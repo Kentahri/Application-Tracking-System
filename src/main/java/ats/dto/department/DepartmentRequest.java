@@ -1,4 +1,4 @@
-package quan.ats.dto.department;
+package ats.dto.department;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package quan.ats.entity;
+package ats.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

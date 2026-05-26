@@ -1,10 +1,14 @@
-package quan.ats.controller;
+package ats.controller;
 
+import ats.dto.department.DepartmentDeleteRequest;
+import ats.dto.department.DepartmentRequest;
+import ats.dto.department.DepartmentResponse;
+import ats.dto.department.DepartmentUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import quan.ats.dto.department.*;
-import quan.ats.service.DepartmentService;
+import ats.service.DepartmentService;
 
 import java.util.List;
 
