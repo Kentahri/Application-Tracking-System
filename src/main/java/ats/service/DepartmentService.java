@@ -1,9 +1,9 @@
-package quan.ats.service;
+package ats.service;
 
-import quan.ats.dto.department.DepartmentDeleteRequest;
-import quan.ats.dto.department.DepartmentRequest;
-import quan.ats.dto.department.DepartmentResponse;
-import quan.ats.dto.department.DepartmentUpdateRequest;
+import ats.dto.department.DepartmentDeleteRequest;
+import ats.dto.department.DepartmentRequest;
+import ats.dto.department.DepartmentResponse;
+import ats.dto.department.DepartmentUpdateRequest;
 
 import java.util.List;
 

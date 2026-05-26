@@ -1,13 +1,13 @@
-package quan.ats.mapper;
+package ats.mapper;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import quan.ats.dto.department.DepartmentRequest;
-import quan.ats.dto.department.DepartmentResponse;
-import quan.ats.dto.department.DepartmentUpdateRequest;
-import quan.ats.entity.Department;
+import ats.dto.department.DepartmentRequest;
+import ats.dto.department.DepartmentResponse;
+import ats.dto.department.DepartmentUpdateRequest;
+import ats.entity.Department;
 
 import java.util.List;
 

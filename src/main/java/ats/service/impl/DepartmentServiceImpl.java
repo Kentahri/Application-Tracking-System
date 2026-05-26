@@ -1,17 +1,17 @@
-package quan.ats.service.impl;
+package ats.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import quan.ats.dto.department.DepartmentDeleteRequest;
-import quan.ats.dto.department.DepartmentRequest;
-import quan.ats.dto.department.DepartmentResponse;
-import quan.ats.dto.department.DepartmentUpdateRequest;
-import quan.ats.entity.Department;
-import quan.ats.mapper.DepartmentMapper;
-import quan.ats.repository.DepartmentRepository;
-import quan.ats.service.DepartmentService;
+import ats.dto.department.DepartmentDeleteRequest;
+import ats.dto.department.DepartmentRequest;
+import ats.dto.department.DepartmentResponse;
+import ats.dto.department.DepartmentUpdateRequest;
+import ats.entity.Department;
+import ats.mapper.DepartmentMapper;
+import ats.repository.DepartmentRepository;
+import ats.service.DepartmentService;
 
 import java.util.List;
 

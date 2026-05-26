@@ -1,7 +1,7 @@
-package quan.ats.repository;
+package ats.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import quan.ats.entity.Department;
+import ats.entity.Department;
 
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
 

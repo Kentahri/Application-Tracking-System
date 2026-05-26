@@ -1,4 +1,4 @@
-package quan.ats.dto.department;
+package ats.dto.department;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
