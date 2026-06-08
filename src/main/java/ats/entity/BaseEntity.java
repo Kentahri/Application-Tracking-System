@@ -21,14 +21,8 @@ public class BaseEntity {
     @Column(name = "update_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_by", columnDefinition = "NVARCHAR(255)")
-    private String createdBy;
-
     @Column(name = "is_deleted")
     private Boolean isDeleted;
-
-    @Column(name = "updated_by", columnDefinition = "NVARCHAR(255)")
-    private String updatedBy;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

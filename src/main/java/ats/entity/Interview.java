@@ -1,0 +1,48 @@
+package ats.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "interviews")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+public class Interview extends BaseEntity{
+
+    @ManyToOne
+    @JoinColumn(name = "application_id")
+    private Application applicationId;
+
+    @Column(name = "scheduled_at")
+    private LocalDateTime scheduledAt;
+
+    @Column(name = "meeting_link", columnDefinition = "NVARCHAR(1000)")
+    private String meetingLink;
+
+    @Column(columnDefinition = "NVARCHAR(50)")
+    private String status;
+
+    @Column(name  = "duration_minutes")
+    private Integer durationMinutes;
+
+    @Column(name = "feed_back")
+    private String feedBack;
+
+    @Column(columnDefinition = "NVARCHAR(50)")
+    private String result;
+
+}
+
