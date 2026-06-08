@@ -1,9 +1,15 @@
 package ats.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -12,18 +18,13 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class Job extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", columnDefinition = "BIGINT")
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "department_id")
-    private Department department;
+    private Department departmentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recruiter_id")
-    private User recruiter;
+    private User recruiterId;
 
     @Column(name = "title", columnDefinition = "VARCHAR(500)")
     private String title;
@@ -42,17 +43,4 @@ public class Job extends BaseEntity {
 
     @Column(name = "status", columnDefinition = "VARCHAR(50)")
     private String status;
-
-    @Column(name = "utm_source", columnDefinition = "VARCHAR(150)")
-    private String utmSource;
-
-    @Column(name = "utm_medium", columnDefinition = "VARCHAR(150)")
-    private String utmMedium;
-
-    @Column(name = "deadline", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private LocalDateTime deadline;
-
-    @Column(name = "published_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private LocalDateTime publishedAt;
-
 }
