@@ -17,3 +17,5 @@ spring:
   messages:
     basename: i18n/messages
     encoding: UTF-8
+jwt:
+  secret: ${JWT_SECRET}
