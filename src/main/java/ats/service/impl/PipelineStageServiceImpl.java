@@ -1,5 +1,6 @@
 package ats.service.impl;
 
+import ats.entity.PipelineStage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,7 +9,6 @@ import ats.dto.pipelinestage.PipelineStageDeleteRequest;
 import ats.dto.pipelinestage.PipelineStageRequest;
 import ats.dto.pipelinestage.PipelineStageResponse;
 import ats.dto.pipelinestage.PipelineStageUpdateRequest;
-import ats.entity.PinelineStage;
 import ats.mapper.PipelineStageMapper;
 import ats.repository.PipelineStageRepository;
 import ats.service.PipelineStageService;
@@ -24,7 +24,7 @@ public class PipelineStageServiceImpl implements PipelineStageService {
     private final PipelineStageRepository pipelineStageRepository;
     private final PipelineStageMapper pipelineStageMapper;
 
-    private PinelineStage getPipelineStageOrThrow(Long id) {
+    private PipelineStage getPipelineStageOrThrow(Long id) {
         return pipelineStageRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Pipeline stage not found with id: {}", id);
@@ -35,7 +35,7 @@ public class PipelineStageServiceImpl implements PipelineStageService {
     @Override
     public List<PipelineStageResponse> getAllPipelineStages() {
         log.debug("getting all pipeline stages");
-        List<PinelineStage> pipelineStages = pipelineStageRepository.findAll();
+        List<PipelineStage> pipelineStages = pipelineStageRepository.findAll();
         List<PipelineStageResponse> responses = pipelineStageMapper.toDto(pipelineStages);
         return responses;
     }
@@ -44,7 +44,7 @@ public class PipelineStageServiceImpl implements PipelineStageService {
     public PipelineStageResponse getPipelineStageById(Long id) {
         log.debug("getting pipeline stage by id: {}", id);
 
-        PinelineStage pipelineStage = getPipelineStageOrThrow(id);
+        PipelineStage pipelineStage = getPipelineStageOrThrow(id);
         PipelineStageResponse response = pipelineStageMapper.toDto(pipelineStage);
         return response;
     }
@@ -59,8 +59,8 @@ public class PipelineStageServiceImpl implements PipelineStageService {
             throw new RuntimeException("Tên giai đoạn đã tồn tại");
         }
 
-        PinelineStage pipelineStage = pipelineStageMapper.toEntity(request);
-        PinelineStage saved = pipelineStageRepository.save(pipelineStage);
+        PipelineStage pipelineStage = pipelineStageMapper.toEntity(request);
+        PipelineStage saved = pipelineStageRepository.save(pipelineStage);
 
         log.info("created pipeline stage with id: {}", saved.getId());
         return pipelineStageMapper.toDto(saved);
@@ -71,7 +71,7 @@ public class PipelineStageServiceImpl implements PipelineStageService {
     public PipelineStageResponse update(Long id, PipelineStageUpdateRequest request) {
         log.info("updating pipeline stage with id: {}", id);
 
-        PinelineStage pipelineStage = getPipelineStageOrThrow(id);
+        PipelineStage pipelineStage = getPipelineStageOrThrow(id);
 
         pipelineStageMapper.updateEntity(request, pipelineStage);
 
@@ -84,7 +84,7 @@ public class PipelineStageServiceImpl implements PipelineStageService {
     public void delete(PipelineStageDeleteRequest request) {
         log.info("deleting pipeline stage with id: {}", request.getId());
 
-        PinelineStage pipelineStage = getPipelineStageOrThrow(request.getId());
+        PipelineStage pipelineStage = getPipelineStageOrThrow(request.getId());
         pipelineStageRepository.delete(pipelineStage);
         log.info("deleted pipeline stage with id: {}", request.getId());
     }
