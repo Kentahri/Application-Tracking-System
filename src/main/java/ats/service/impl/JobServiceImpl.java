@@ -1,19 +1,30 @@
 package ats.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ats.dto.job.JobDeleteRequest;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
 import ats.dto.job.JobUpdateRequest;
 import ats.entity.Job;
+import ats.entity.User;
+import ats.exception.BadRequestException;
+import ats.exception.NotFoundException;
+import ats.exception.UnauthorizedException;
+import ats.helper.MessageHelper;
+import ats.http.PageResponse;
+import ats.http.PagingRequest;
 import ats.mapper.JobMapper;
+import ats.repository.DepartmentRepository;
 import ats.repository.JobRepository;
+import ats.repository.UserRepository;
 import ats.service.JobService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.security.Principal;
 
 @Service
 @Slf4j
@@ -21,23 +32,71 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
 
+    private static final String DEFAULT_STATUS = "OPEN";
+
     private final JobRepository jobRepository;
+    private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
     private final JobMapper jobMapper;
+
+    private String message(String code, Object... args) {
+        return MessageHelper.getMessage(code, args);
+    }
 
     private Job getJobOrThrow(Long id) {
         return jobRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Job not found with id: {}", id);
-                    return new RuntimeException("Không tìm thấy công việc với id: " + id);
+                    return new NotFoundException(message("error.job.notFound", id));
                 });
     }
 
+    private void validateDepartmentExists(Long departmentId) {
+        if (departmentId != null && !departmentRepository.existsById(departmentId)) {
+            log.warn("Department not found with id: {}", departmentId);
+            throw new NotFoundException(message("error.department.notFound", departmentId));
+        }
+    }
+
+    private User getRecruiterFromPrincipal(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new UnauthorizedException(message("error.auth.unauthorized"));
+        }
+
+        String email = principal.getName();
+        User recruiter = userRepository.findByEmail(email);
+        if (recruiter == null) {
+            log.warn("Authenticated user not found with email: {}", email);
+            throw new NotFoundException(message("error.user.email.notFound", email));
+        }
+        return recruiter;
+    }
+
+    private void validateSalaryRange(BigDecimal salaryMin, BigDecimal salaryMax) {
+        if (salaryMin != null && salaryMax != null && salaryMin.compareTo(salaryMax) > 0) {
+            log.warn("Invalid salary range: salaryMin={} salaryMax={}", salaryMin, salaryMax);
+            throw new BadRequestException(message("error.job.salaryRange.invalid"));
+        }
+    }
+
+    private String normalizeStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return DEFAULT_STATUS;
+        }
+        return status.trim();
+    }
+
     @Override
-    public List<JobResponse> getAllJobs() {
-        log.debug("getting all jobs");
-        List<Job> jobs = jobRepository.findAll();
-        List<JobResponse> responses = jobMapper.toDto(jobs);
-        return responses;
+    public PageResponse<JobResponse> getAllJobs(Principal principal, PagingRequest pagingRequest) {
+        log.debug("getting recruiter jobs page: {}, size: {}", pagingRequest.getPage(), pagingRequest.getSize());
+
+        User recruiter = getRecruiterFromPrincipal(principal);
+        Page<Job> jobs = jobRepository.findByRecruiterId_Id(
+                recruiter.getId(),
+                pagingRequest.toPageable(Sort.by(Sort.Direction.DESC, "id"))
+        );
+        Page<JobResponse> responses = jobs.map(jobMapper::toDto);
+        return PageResponse.of(responses);
     }
 
     @Override
@@ -45,21 +104,30 @@ public class JobServiceImpl implements JobService {
         log.debug("getting job by id: {}", id);
 
         Job job = getJobOrThrow(id);
-        JobResponse response = jobMapper.toDto(job);
-        return response;
+        return jobMapper.toDto(job);
     }
 
     @Override
     @Transactional
-    public JobResponse create(JobRequest request) {
+    public JobResponse create(JobRequest request, Principal principal) {
         log.info("creating new job with title: {}", request.getTitle());
 
-        if(jobRepository.existsByTitle(request.getTitle())) {
-            log.warn("Job title already exists: {}", request.getTitle());
-            throw new RuntimeException("Tiêu đề công việc đã tồn tại");
+        String title = request.getTitle().trim();
+
+        if (jobRepository.existsByTitle(title)) {
+            log.warn("Job title already exists: {}", title);
+            throw new BadRequestException(message("error.job.title.exists"));
         }
 
+        validateDepartmentExists(request.getDepartmentId());
+        validateSalaryRange(request.getSalaryMin(), request.getSalaryMax());
+        User recruiter = getRecruiterFromPrincipal(principal);
+
+        request.setTitle(title);
+        request.setStatus(normalizeStatus(request.getStatus()));
+
         Job job = jobMapper.toEntity(request);
+        job.setRecruiterId(recruiter);
         Job saved = jobRepository.save(job);
 
         log.info("created job with id: {}", saved.getId());
@@ -73,6 +141,28 @@ public class JobServiceImpl implements JobService {
 
         Job job = getJobOrThrow(id);
 
+        if (request.getTitle() != null) {
+            String title = request.getTitle().trim();
+            if (title.isBlank()) {
+                throw new BadRequestException(message("error.job.title.blank"));
+            }
+            if (jobRepository.existsByTitleAndIdNot(title, id)) {
+                log.warn("Job title already exists: {}", title);
+                throw new BadRequestException(message("error.job.title.exists"));
+            }
+            request.setTitle(title);
+        }
+
+        validateDepartmentExists(request.getDepartmentId());
+
+        BigDecimal salaryMin = request.getSalaryMin() != null ? request.getSalaryMin() : job.getSalaryMin();
+        BigDecimal salaryMax = request.getSalaryMax() != null ? request.getSalaryMax() : job.getSalaryMax();
+        validateSalaryRange(salaryMin, salaryMax);
+
+        if (request.getStatus() != null) {
+            request.setStatus(request.getStatus().trim());
+        }
+
         jobMapper.updateEntity(request, job);
 
         log.info("updated job id: {} with data: {}", id, request);
@@ -81,12 +171,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
-    public void delete(JobDeleteRequest request) {
-        log.info("deleting job with id: {}", request.getId());
+    public void delete(Long id) {
+        log.info("deleting job with id: {}", id);
 
-        Job job = getJobOrThrow(request.getId());
+        Job job = getJobOrThrow(id);
         jobRepository.delete(job);
-        log.info("deleted job with id: {}", request.getId());
+        log.info("deleted job with id: {}", id);
     }
 }
-

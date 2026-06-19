@@ -33,8 +33,8 @@ public class Application extends BaseEntity{
     private Cv cvId;
 
     @ManyToOne
-    @JoinColumn(name = "pineline_stage_id")
-    private PinelineStage pinelineStageId;
+    @JoinColumn(name = "pipeline_stage_id")
+    private PipelineStage pipelineStageId;
 
     @Column(columnDefinition = "NVARCHAR(50)")
     private String status;

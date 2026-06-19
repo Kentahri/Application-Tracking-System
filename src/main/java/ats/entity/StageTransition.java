@@ -28,11 +28,11 @@ public class StageTransition extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "from_stage_id")
-    private PinelineStage fromStageId;
+    private PipelineStage fromStageId;
 
     @ManyToOne
     @JoinColumn(name = "to_stage_id")
-    private PinelineStage toStageId;
+    private PipelineStage toStageId;
 
     private String notes;
 

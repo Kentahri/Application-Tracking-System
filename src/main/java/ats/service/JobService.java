@@ -1,22 +1,23 @@
 package ats.service;
 
-import ats.dto.job.JobDeleteRequest;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
 import ats.dto.job.JobUpdateRequest;
+import ats.http.PageResponse;
+import ats.http.PagingRequest;
 
-import java.util.List;
+import java.security.Principal;
 
 public interface JobService {
 
-    List<JobResponse> getAllJobs();
+    PageResponse<JobResponse> getAllJobs(Principal principal, PagingRequest pagingRequest);
 
     JobResponse getJobById(Long id);
 
-    JobResponse create(JobRequest request);
+    JobResponse create(JobRequest request, Principal principal);
 
     JobResponse update(Long id, JobUpdateRequest request);
 
-    void delete(JobDeleteRequest request);
+    void delete(Long id);
 }
 

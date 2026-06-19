@@ -10,13 +10,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "pineline_stages")
+@Table(name = "pipeline_stages")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class PinelineStage extends BaseEntity{
+public class PipelineStage extends BaseEntity{
 
     @Column(name = "stage_name", columnDefinition = "NVARCHAR(100)")
     private String stageName;

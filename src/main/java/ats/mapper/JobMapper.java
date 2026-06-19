@@ -25,12 +25,12 @@ public interface JobMapper {
     List<JobResponse> toDto(List<Job> jobs);
 
     @Mapping(target = "departmentId", source = "departmentId", qualifiedByName = "mapDepartmentIdToEntity")
-    @Mapping(target = "recruiterId", source = "recruiterId", qualifiedByName = "mapUserIdToEntity")
+    @Mapping(target = "recruiterId", ignore = true)
     Job toEntity(JobRequest jobRequest);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "departmentId", source = "departmentId", qualifiedByName = "mapDepartmentIdToEntity")
-    @Mapping(target = "recruiterId", source = "recruiterId", qualifiedByName = "mapUserIdToEntity")
+    @Mapping(target = "recruiterId", ignore = true)
     void updateEntity(JobUpdateRequest jobUpdateRequest, @MappingTarget Job job);
 
     @Named("mapDepartmentIdToEntity")
