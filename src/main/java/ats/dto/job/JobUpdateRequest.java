@@ -16,21 +16,19 @@ public class JobUpdateRequest {
 
     private Long departmentId;
 
-    private Long recruiterId;
-
-    @Size(max = 500, message = "validation.job.title.size")
+    @Size(max = 500, message = "{validation.job.title.size}")
     private String title;
 
     private String description;
 
-    @Size(max = 500, message = "validation.job.location.size")
+    @Size(max = 500, message = "{validation.job.location.size}")
     private String location;
 
     private BigDecimal salaryMin;
 
     private BigDecimal salaryMax;
 
-    @Size(max = 50, message = "validation.job.status.size")
+    @Size(max = 50, message = "{validation.job.status.size}")
     private String status;
 }
 

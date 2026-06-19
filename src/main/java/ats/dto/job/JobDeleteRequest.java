@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 public class JobDeleteRequest {
 
-    @NotNull(message = "validation.job.id.null")
+    @NotNull(message = "{validation.job.id.null}")
     private Long id;
 }
 
