@@ -8,6 +8,8 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 
@@ -16,6 +18,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "jobs")
 @EqualsAndHashCode(callSuper = true)
+@SQLDelete(sql = "UPDATE jobs SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
 public class Job extends BaseEntity {
 
     @ManyToOne

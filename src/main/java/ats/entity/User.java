@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "users")
@@ -21,6 +23,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE users SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
 public class User extends BaseEntity{
 
     @ManyToOne
