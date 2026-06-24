@@ -1,5 +1,6 @@
 package ats.dto.job;
 
+import ats.constant.JobStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,6 @@ public class JobResponse {
     private String location;
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
-    private String status;
+    private JobStatus status;
 }
 

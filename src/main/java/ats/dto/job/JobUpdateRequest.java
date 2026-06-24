@@ -1,5 +1,6 @@
 package ats.dto.job;
 
+import ats.constant.JobStatus;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +29,6 @@ public class JobUpdateRequest {
 
     private BigDecimal salaryMax;
 
-    @Size(max = 50, message = "{validation.job.status.size}")
-    private String status;
+    private JobStatus status;
 }
 

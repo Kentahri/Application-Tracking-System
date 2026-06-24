@@ -1,5 +1,6 @@
 package ats.service;
 
+import ats.dto.kanban.KanbanBoardResponse;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
 import ats.dto.job.JobUpdateRequest;
@@ -13,6 +14,8 @@ public interface JobService {
     PageResponse<JobResponse> getAllJobs(Principal principal, PagingRequest pagingRequest);
 
     JobResponse getJobById(Long id);
+
+    KanbanBoardResponse getKanbanBoard(Long jobId, Principal principal);
 
     JobResponse create(JobRequest request, Principal principal);
 

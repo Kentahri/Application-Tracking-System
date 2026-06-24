@@ -16,25 +16,29 @@ import org.springframework.data.domain.Sort;
 @Setter
 public class PagingRequest {
 
-    private int page = 0;
+    private int page = 1;
     private int size = 10;
 
     public Pageable toPageable() {
         validate();
-        return PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return PageRequest.of(toZeroBasedPage(), size, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     public Pageable toPageable(Sort sort) {
         validate();
-        return PageRequest.of(page, size, sort);
+        return PageRequest.of(toZeroBasedPage(), size, sort);
     }
 
     private void validate() {
-        if (page < 0) {
+        if (page < 1) {
             throw new BadRequestException(MessageHelper.getMessage("error.pagination.page.invalid"));
         }
         if (size <= 0) {
             throw new BadRequestException(MessageHelper.getMessage("error.pagination.size.invalid"));
         }
+    }
+
+    private int toZeroBasedPage() {
+        return page - 1;
     }
 }
