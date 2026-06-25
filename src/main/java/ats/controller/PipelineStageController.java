@@ -1,14 +1,16 @@
 package ats.controller;
 
-import ats.dto.pipelinestage.PipelineStageDeleteRequest;
 import ats.dto.pipelinestage.PipelineStageRequest;
 import ats.dto.pipelinestage.PipelineStageResponse;
 import ats.dto.pipelinestage.PipelineStageUpdateRequest;
+import ats.http.PageResponse;
+import ats.http.PagingRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ats.service.PipelineStageService;
@@ -19,9 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/pipeline-stages")
@@ -33,11 +34,14 @@ public class PipelineStageController {
     private final PipelineStageService pipelineStageService;
 
     @GetMapping
-    @Operation(summary = "Get all pipeline stages", description = "Get all pipeline stages")
+    @Operation(summary = "Get all pipeline stages", description = "Get paginated pipeline stages")
     @ApiResponse(responseCode = "200", description = "Pipeline stages retrieved successfully")
-    public List<PipelineStageResponse> getAll() {
-        log.debug("REST request to get all pipeline stages");
-        return pipelineStageService.getAllPipelineStages();
+    public PageResponse<PipelineStageResponse> getAll(@Parameter(description = "Page index, starting from 0")
+                                                      @RequestParam(defaultValue = "0") int page,
+                                                      @Parameter(description = "Number of records per page")
+                                                      @RequestParam(defaultValue = "10") int size) {
+        log.debug("REST request to get pipeline stages page: {}, size: {}", page, size);
+        return pipelineStageService.getAllPipelineStages(new PagingRequest(page, size));
     }
 
     @GetMapping("/{id}")
@@ -57,7 +61,7 @@ public class PipelineStageController {
             @ApiResponse(responseCode = "200", description = "Pipeline stage created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
-    public PipelineStageResponse create(@RequestBody PipelineStageRequest request) {
+    public PipelineStageResponse create(@Valid @RequestBody PipelineStageRequest request) {
         log.debug("REST request to create pipeline stage: {}", request);
         return pipelineStageService.create(request);
     }
@@ -70,20 +74,20 @@ public class PipelineStageController {
             @ApiResponse(responseCode = "404", description = "Pipeline stage not found")
     })
     public PipelineStageResponse update(@Parameter(description = "Pipeline stage id") @PathVariable Long id,
-                                        @RequestBody PipelineStageUpdateRequest request) {
+                                        @Valid @RequestBody PipelineStageUpdateRequest request) {
         log.debug("REST request to update pipeline stage id: {}", id);
         return pipelineStageService.update(id, request);
     }
 
-    @DeleteMapping
-    @Operation(summary = "Delete pipeline stage", description = "Soft delete a pipeline stage")
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete pipeline stage", description = "Soft delete a pipeline stage by id")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pipeline stage deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Pipeline stage not found")
     })
-    public void delete(@RequestBody PipelineStageDeleteRequest request) {
-        log.debug("REST request to delete pipeline stage: {}", request.getId());
-        pipelineStageService.delete(request);
+    public void delete(@Parameter(description = "Pipeline stage id") @PathVariable Long id) {
+        log.debug("REST request to delete pipeline stage: {}", id);
+        pipelineStageService.delete(id);
     }
 }
 
