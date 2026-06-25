@@ -1,6 +1,10 @@
 package ats.config;
 
+import ats.constant.InterviewResult;
+import ats.constant.InterviewStatus;
+import ats.constant.JobStatus;
 import ats.constant.UserRole;
+import ats.constant.UserStatus;
 import ats.entity.*;
 import ats.entity.PipelineStage;
 import ats.repository.ApplicationRepository;
@@ -102,7 +106,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1200),
                     BigDecimal.valueOf(2500),
-                    "OPEN",
+                    JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
             );
@@ -113,7 +117,7 @@ public class ApplicationInitConfig {
                     "Da Nang",
                     BigDecimal.valueOf(1000),
                     BigDecimal.valueOf(2200),
-                    "OPEN",
+                    JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
             );
@@ -124,7 +128,7 @@ public class ApplicationInitConfig {
                     "Remote",
                     BigDecimal.valueOf(300),
                     BigDecimal.valueOf(600),
-                    "OPEN",
+                    JobStatus.DRAFT,
                     humanResources,
                     recruiterB
             );
@@ -135,7 +139,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(800),
                     BigDecimal.valueOf(1500),
-                    "CLOSED",
+                    JobStatus.CLOSED,
                     marketing,
                     recruiterB
             );
@@ -144,22 +148,19 @@ public class ApplicationInitConfig {
                     candidateRepository,
                     "candidate.one@example.com",
                     "Candidate One",
-                    "0901000001",
-                    "ACTIVE"
+                    "0901000001"
             );
             Candidate candidateB = getOrCreateCandidate(
                     candidateRepository,
                     "candidate.two@example.com",
                     "Candidate Two",
-                    "0901000002",
-                    "ACTIVE"
+                    "0901000002"
             );
             Candidate candidateC = getOrCreateCandidate(
                     candidateRepository,
                     "candidate.three@example.com",
                     "Candidate Three",
-                    "0901000003",
-                    "ACTIVE"
+                    "0901000003"
             );
 
             Cv cvA = getOrCreateCv(cvRepository, candidateA, "/sample/cvs/candidate-one.pdf", "PDF");
@@ -171,24 +172,21 @@ public class ApplicationInitConfig {
                     backendJob,
                     candidateA,
                     cvA,
-                    screening,
-                    "IN_PROGRESS"
+                    screening
             );
             Application appB = getOrCreateApplication(
                     applicationRepository,
                     backendJob,
                     candidateB,
                     cvB,
-                    applied,
-                    "NEW"
+                    applied
             );
             Application appC = getOrCreateApplication(
                     applicationRepository,
                     frontendJob,
                     candidateC,
                     cvC,
-                    interviewStage,
-                    "IN_PROGRESS"
+                    interviewStage
             );
 
             getOrCreateTransition(stageTransitionRepository, appA, applied, screening, "Passed resume screening");
@@ -200,10 +198,10 @@ public class ApplicationInitConfig {
                     appC,
                     LocalDateTime.now().plusDays(2).withHour(10).withMinute(0).withSecond(0).withNano(0),
                     "https://meet.example.com/frontend-candidate-three",
-                    "SCHEDULED",
+                    InterviewStatus.SCHEDULED,
                     60,
                     null,
-                    null
+                    InterviewResult.PENDING
             );
         };
     }
@@ -243,7 +241,7 @@ public class ApplicationInitConfig {
         user.setPasswordHash(passwordEncoder.encode("123456"));
         user.setPhone("0900000000");
         user.setRole(role);
-        user.setStatus("ACTIVE");
+        user.setStatus(UserStatus.ACTIVE);
         return repository.save(user);
     }
 
@@ -268,7 +266,7 @@ public class ApplicationInitConfig {
                                String location,
                                BigDecimal salaryMin,
                                BigDecimal salaryMax,
-                               String status,
+                               JobStatus status,
                                Department department,
                                User recruiter) {
         Job job = repository.findByTitle(title);
@@ -292,8 +290,7 @@ public class ApplicationInitConfig {
     private Candidate getOrCreateCandidate(CandidateRepository repository,
                                            String email,
                                            String name,
-                                           String phone,
-                                           String status) {
+                                           String phone) {
         Candidate candidate = repository.findByEmail(email);
         if (candidate != null) {
             return candidate;
@@ -304,7 +301,6 @@ public class ApplicationInitConfig {
         candidate.setEmail(email);
         candidate.setName(name);
         candidate.setPhone(phone);
-        candidate.setStatus(status);
         return repository.save(candidate);
     }
 
@@ -329,8 +325,7 @@ public class ApplicationInitConfig {
                                                Job job,
                                                Candidate candidate,
                                                Cv cv,
-                                               PipelineStage stage,
-                                               String status) {
+                                               PipelineStage stage) {
         Application application = repository.findByCandidateId_IdAndJobId_Id(candidate.getId(), job.getId());
         if (application != null) {
             return application;
@@ -342,7 +337,6 @@ public class ApplicationInitConfig {
         application.setCandidateId(candidate);
         application.setCvId(cv);
         application.setPipelineStageId(stage);
-        application.setStatus(status);
         return repository.save(application);
     }
 
@@ -369,10 +363,10 @@ public class ApplicationInitConfig {
                                            Application application,
                                            LocalDateTime scheduledAt,
                                            String meetingLink,
-                                           String status,
+                                           InterviewStatus status,
                                            Integer durationMinutes,
                                            String feedback,
-                                           String result) {
+                                           InterviewResult result) {
         if (repository.existsByApplicationId_Id(application.getId())) {
             return null;
         }

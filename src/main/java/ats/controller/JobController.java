@@ -1,5 +1,6 @@
 package ats.controller;
 
+import ats.dto.kanban.KanbanBoardResponse;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
 import ats.dto.job.JobUpdateRequest;
@@ -42,8 +43,8 @@ public class JobController {
             @ApiResponse(responseCode = "401", description = "Unauthenticated"),
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
-    public PageResponse<JobResponse> getAll(@Parameter(description = "Page index, starting from 0")
-                                            @RequestParam(defaultValue = "0") int page,
+    public PageResponse<JobResponse> getAll(@Parameter(description = "Page number, starting from 1")
+                                            @RequestParam(defaultValue = "1") int page,
                                             @Parameter(description = "Number of records per page")
                                             @RequestParam(defaultValue = "10") int size,
                                             Principal principal) {
@@ -60,6 +61,19 @@ public class JobController {
     public JobResponse getById(@Parameter(description = "Job id") @PathVariable Long id) {
         log.debug("REST request to get job by id: {}", id);
         return jobService.getJobById(id);
+    }
+
+    @GetMapping("/{id}/kanban")
+    @Operation(summary = "Get job Kanban board", description = "Get applications grouped by pipeline stages for a job")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Kanban board retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated or access denied"),
+            @ApiResponse(responseCode = "404", description = "Job not found")
+    })
+    public KanbanBoardResponse getKanbanBoard(@Parameter(description = "Job id") @PathVariable Long id,
+                                              Principal principal) {
+        log.debug("REST request to get Kanban board for job id: {}", id);
+        return jobService.getKanbanBoard(id, principal);
     }
 
     @PostMapping

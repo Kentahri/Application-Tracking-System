@@ -1,7 +1,11 @@
 package ats.entity;
 
+import ats.constant.InterviewResult;
+import ats.constant.InterviewStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -10,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +26,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE interviews SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
 public class Interview extends BaseEntity{
 
     @ManyToOne
@@ -33,7 +41,8 @@ public class Interview extends BaseEntity{
     private String meetingLink;
 
     @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private InterviewStatus status;
 
     @Column(name  = "duration_minutes")
     private Integer durationMinutes;
@@ -42,7 +51,8 @@ public class Interview extends BaseEntity{
     private String feedBack;
 
     @Column(columnDefinition = "NVARCHAR(50)")
-    private String result;
+    @Enumerated(EnumType.STRING)
+    private InterviewResult result;
 
 }
 
