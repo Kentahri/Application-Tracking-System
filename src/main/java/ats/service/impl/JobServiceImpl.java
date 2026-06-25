@@ -1,9 +1,15 @@
 package ats.service.impl;
 
+import ats.constant.JobStatus;
+import ats.dto.kanban.KanbanApplicationResponse;
+import ats.dto.kanban.KanbanBoardResponse;
+import ats.dto.kanban.KanbanStageResponse;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
 import ats.dto.job.JobUpdateRequest;
+import ats.entity.Application;
 import ats.entity.Job;
+import ats.entity.PipelineStage;
 import ats.entity.User;
 import ats.exception.BadRequestException;
 import ats.exception.NotFoundException;
@@ -12,8 +18,11 @@ import ats.helper.MessageHelper;
 import ats.http.PageResponse;
 import ats.http.PagingRequest;
 import ats.mapper.JobMapper;
+import ats.mapper.KanbanMapper;
+import ats.repository.ApplicationRepository;
 import ats.repository.DepartmentRepository;
 import ats.repository.JobRepository;
+import ats.repository.PipelineStageRepository;
 import ats.repository.UserRepository;
 import ats.service.JobService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,12 +45,15 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
 
-    private static final String DEFAULT_STATUS = "OPEN";
+    private static final JobStatus DEFAULT_STATUS = JobStatus.DRAFT;
 
     private final JobRepository jobRepository;
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
+    private final PipelineStageRepository pipelineStageRepository;
+    private final ApplicationRepository applicationRepository;
     private final JobMapper jobMapper;
+    private final KanbanMapper kanbanMapper;
 
     private String message(String code, Object... args) {
         return MessageHelper.getMessage(code, args);
@@ -79,11 +95,19 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-    private String normalizeStatus(String status) {
-        if (status == null || status.isBlank()) {
+    private JobStatus normalizeStatus(JobStatus status) {
+        if (status == null) {
             return DEFAULT_STATUS;
         }
-        return status.trim();
+        return status;
+    }
+
+    private void validateRecruiterOwnsJob(Job job, User recruiter) {
+        Long jobRecruiterId = job.getRecruiterId() != null ? job.getRecruiterId().getId() : null;
+        if (!Objects.equals(jobRecruiterId, recruiter.getId())) {
+            log.warn("Recruiter id: {} attempted to access job id: {}", recruiter.getId(), job.getId());
+            throw new UnauthorizedException(message("error.job.accessDenied"));
+        }
     }
 
     @Override
@@ -105,6 +129,34 @@ public class JobServiceImpl implements JobService {
 
         Job job = getJobOrThrow(id);
         return jobMapper.toDto(job);
+    }
+
+    @Override
+    public KanbanBoardResponse getKanbanBoard(Long jobId, Principal principal) {
+        log.debug("getting Kanban board for job id: {}", jobId);
+
+        User recruiter = getRecruiterFromPrincipal(principal);
+        Job job = getJobOrThrow(jobId);
+        validateRecruiterOwnsJob(job, recruiter);
+
+        List<PipelineStage> stages = pipelineStageRepository.findAllByOrderByStageOrderAsc();
+        List<Application> applications = applicationRepository.findByJobIdWithDetails(jobId);
+        Map<Long, List<Application>> applicationsByStageId = applications.stream()
+                .collect(Collectors.groupingBy(application -> application.getPipelineStageId().getId()));
+
+        List<KanbanStageResponse> stageResponses = stages.stream()
+                .map(stage -> {
+                    List<KanbanApplicationResponse> applicationResponses = applicationsByStageId
+                            .getOrDefault(stage.getId(), List.of())
+                            .stream()
+                            .map(kanbanMapper::toApplicationResponse)
+                            .toList();
+
+                    return kanbanMapper.toStageResponse(stage, applicationResponses);
+                })
+                .toList();
+
+        return kanbanMapper.toBoardResponse(job, stageResponses, applications.size());
     }
 
     @Override
@@ -158,10 +210,6 @@ public class JobServiceImpl implements JobService {
         BigDecimal salaryMin = request.getSalaryMin() != null ? request.getSalaryMin() : job.getSalaryMin();
         BigDecimal salaryMax = request.getSalaryMax() != null ? request.getSalaryMax() : job.getSalaryMax();
         validateSalaryRange(salaryMin, salaryMax);
-
-        if (request.getStatus() != null) {
-            request.setStatus(request.getStatus().trim());
-        }
 
         jobMapper.updateEntity(request, job);
 
