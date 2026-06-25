@@ -5,6 +5,7 @@ import ats.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email);
         if(user == null){
-            throw new RuntimeException("User not found with email: " + email);
+            throw new UsernameNotFoundException("User not found with email: " + email);
         }
 
         return new CustomUserDetails(user);

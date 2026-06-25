@@ -9,6 +9,8 @@ public interface PipelineStageRepository extends JpaRepository<PipelineStage, Lo
 
     boolean existsByStageName(String stageName);
 
+    boolean existsByStageNameAndIdNot(String stageName, Long id);
+
     PipelineStage findByStageName(String stageName);
 
     List<PipelineStage> findAllByOrderByStageOrderAsc();

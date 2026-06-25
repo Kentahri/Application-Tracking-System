@@ -1,19 +1,23 @@
 package ats.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ats.dto.department.DepartmentDeleteRequest;
 import ats.dto.department.DepartmentRequest;
 import ats.dto.department.DepartmentResponse;
 import ats.dto.department.DepartmentUpdateRequest;
 import ats.entity.Department;
+import ats.exception.BadRequestException;
+import ats.exception.NotFoundException;
+import ats.helper.MessageHelper;
+import ats.http.PageResponse;
+import ats.http.PagingRequest;
 import ats.mapper.DepartmentMapper;
 import ats.repository.DepartmentRepository;
 import ats.service.DepartmentService;
-
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -24,20 +28,27 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper;
 
+    private String message(String code, Object... args) {
+        return MessageHelper.getMessage(code, args);
+    }
+
     private Department getDepartmentOrThrow(Long id) {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Department not found with id: {}", id);
-                    return new RuntimeException("Không tìm thấy phòng ban với id: " + id);
+                    return new NotFoundException(message("error.department.notFound", id));
                 });
     }
 
     @Override
-    public List<DepartmentResponse> getAllDepartments() {
-        log.debug("getting all departments");
-        List<Department> department = departmentRepository.findAll();
-        List<DepartmentResponse> responses = departmentMapper.toDto(department);
-        return responses;
+    public PageResponse<DepartmentResponse> getAllDepartments(PagingRequest pagingRequest) {
+        log.debug("getting departments page: {}, size: {}", pagingRequest.getPage(), pagingRequest.getSize());
+
+        Page<Department> departments = departmentRepository.findAll(
+                pagingRequest.toPageable(Sort.by(Sort.Direction.DESC, "id"))
+        );
+        Page<DepartmentResponse> responses = departments.map(departmentMapper::toDto);
+        return PageResponse.of(responses);
     }
 
     @Override
@@ -45,8 +56,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         log.debug("getting department by id: {}", id);
 
         Department department = getDepartmentOrThrow(id);
-        DepartmentResponse response = departmentMapper.toDto(department);
-        return response;
+        return departmentMapper.toDto(department);
     }
 
     @Override
@@ -54,10 +64,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     public DepartmentResponse create(DepartmentRequest request) {
         log.info("creating new department with name: {}", request.getDepartmentName());
 
-        if(departmentRepository.existsByDepartmentName(request.getDepartmentName())) {
-            log.warn("Department name already exists: {}", request.getDepartmentName());
-            throw new RuntimeException("Tên phòng ban đã tồn tại");
+        String departmentName = request.getDepartmentName().trim();
+
+        if (departmentRepository.existsByDepartmentName(departmentName)) {
+            log.warn("Department name already exists: {}", departmentName);
+            throw new BadRequestException(message("error.department.name.exists"));
         }
+
+        request.setDepartmentName(departmentName);
 
         Department department = departmentMapper.toEntity(request);
         Department saved = departmentRepository.save(department);
@@ -73,6 +87,18 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Department department = getDepartmentOrThrow(id);
 
+        if (request.getDepartmentName() != null) {
+            String departmentName = request.getDepartmentName().trim();
+            if (departmentName.isBlank()) {
+                throw new BadRequestException(message("error.department.name.blank"));
+            }
+            if (departmentRepository.existsByDepartmentNameAndIdNot(departmentName, id)) {
+                log.warn("Department name already exists: {}", departmentName);
+                throw new BadRequestException(message("error.department.name.exists"));
+            }
+            request.setDepartmentName(departmentName);
+        }
+
         departmentMapper.updateEntity(request, department);
 
         log.info("updated department id: {} with data: {}", id, request);
@@ -80,11 +106,12 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public void delete(DepartmentDeleteRequest request) {
-        log.info("deleting department with id: {}", request.getId());
+    @Transactional
+    public void delete(Long id) {
+        log.info("deleting department with id: {}", id);
 
-        Department department = getDepartmentOrThrow(request.getId());
+        Department department = getDepartmentOrThrow(id);
         departmentRepository.delete(department);
-        log.info("deleted department with id: {}", request.getId());
+        log.info("deleted department with id: {}", id);
     }
 }
