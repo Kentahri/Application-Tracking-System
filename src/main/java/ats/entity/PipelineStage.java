@@ -8,15 +8,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
-@Table(name = "pineline_stages")
+@Table(name = "pipeline_stages")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class PinelineStage extends BaseEntity{
+@SQLDelete(sql = "UPDATE pipeline_stages SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
+public class PipelineStage extends BaseEntity{
 
     @Column(name = "stage_name", columnDefinition = "NVARCHAR(100)")
     private String stageName;

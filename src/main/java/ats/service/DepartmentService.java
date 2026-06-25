@@ -1,15 +1,14 @@
 package ats.service;
 
-import ats.dto.department.DepartmentDeleteRequest;
 import ats.dto.department.DepartmentRequest;
 import ats.dto.department.DepartmentResponse;
 import ats.dto.department.DepartmentUpdateRequest;
-
-import java.util.List;
+import ats.http.PageResponse;
+import ats.http.PagingRequest;
 
 public interface DepartmentService {
 
-    List<DepartmentResponse> getAllDepartments();
+    PageResponse<DepartmentResponse> getAllDepartments(PagingRequest pagingRequest);
 
     DepartmentResponse getDepartmentById(Long id);
 
@@ -17,5 +16,5 @@ public interface DepartmentService {
 
     DepartmentResponse update(Long id, DepartmentUpdateRequest request);
 
-    void delete(DepartmentDeleteRequest request);
+    void delete(Long id);
 }

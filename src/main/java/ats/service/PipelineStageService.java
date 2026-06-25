@@ -1,15 +1,14 @@
 package ats.service;
 
-import ats.dto.pipelinestage.PipelineStageDeleteRequest;
 import ats.dto.pipelinestage.PipelineStageRequest;
 import ats.dto.pipelinestage.PipelineStageResponse;
 import ats.dto.pipelinestage.PipelineStageUpdateRequest;
-
-import java.util.List;
+import ats.http.PageResponse;
+import ats.http.PagingRequest;
 
 public interface PipelineStageService {
 
-    List<PipelineStageResponse> getAllPipelineStages();
+    PageResponse<PipelineStageResponse> getAllPipelineStages(PagingRequest pagingRequest);
 
     PipelineStageResponse getPipelineStageById(Long id);
 
@@ -17,6 +16,6 @@ public interface PipelineStageService {
 
     PipelineStageResponse update(Long id, PipelineStageUpdateRequest request);
 
-    void delete(PipelineStageDeleteRequest request);
+    void delete(Long id);
 }
 

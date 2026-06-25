@@ -1,6 +1,5 @@
 package ats.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -10,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "applications")
@@ -18,6 +19,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE applications SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
 public class Application extends BaseEntity{
 
     @ManyToOne
@@ -33,10 +36,7 @@ public class Application extends BaseEntity{
     private Cv cvId;
 
     @ManyToOne
-    @JoinColumn(name = "pineline_stage_id")
-    private PinelineStage pinelineStageId;
-
-    @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
+    @JoinColumn(name = "pipeline_stage_id")
+    private PipelineStage pipelineStageId;
 
 }

@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +22,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE stage_transitions SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
 public class StageTransition extends BaseEntity{
 
     @ManyToOne
@@ -28,11 +32,11 @@ public class StageTransition extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "from_stage_id")
-    private PinelineStage fromStageId;
+    private PipelineStage fromStageId;
 
     @ManyToOne
     @JoinColumn(name = "to_stage_id")
-    private PinelineStage toStageId;
+    private PipelineStage toStageId;
 
     private String notes;
 

@@ -1,5 +1,6 @@
 package ats.dto.job;
 
+import ats.constant.JobStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,26 +17,22 @@ import java.math.BigDecimal;
 @Setter
 public class JobRequest {
 
-    @NotNull(message = "validation.job.departmentId.null")
+    @NotNull(message = "{validation.job.departmentId.null}")
     private Long departmentId;
 
-    @NotNull(message = "validation.job.recruiterId.null")
-    private Long recruiterId;
-
-    @Size(max = 500, message = "validation.job.title.size")
-    @NotBlank(message = "validation.job.title.null")
+    @Size(max = 500, message = "{validation.job.title.size}")
+    @NotBlank(message = "{validation.job.title.null}")
     private String title;
 
     private String description;
 
-    @Size(max = 500, message = "validation.job.location.size")
+    @Size(max = 500, message = "{validation.job.location.size}")
     private String location;
 
     private BigDecimal salaryMin;
 
     private BigDecimal salaryMax;
 
-    @Size(max = 50, message = "validation.job.status.size")
-    private String status;
+    private JobStatus status;
 }
 

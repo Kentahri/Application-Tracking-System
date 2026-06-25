@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "candidates")
@@ -14,6 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE candidates SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLRestriction("is_deleted = 0")
 public class Candidate extends BaseEntity {
 
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
@@ -21,9 +25,6 @@ public class Candidate extends BaseEntity {
 
     @Column(columnDefinition = "NVARCHAR(255)")
     private String email;
-
-    @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
 
     @Column(columnDefinition = "NVARCHAR(30)")
     private String phone;
