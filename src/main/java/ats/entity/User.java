@@ -1,6 +1,7 @@
 package ats.entity;
 
 import ats.constant.UserRole;
+import ats.constant.UserStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,6 +49,7 @@ public class User extends BaseEntity{
     private UserRole role;
 
     @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 
 }

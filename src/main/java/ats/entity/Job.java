@@ -1,7 +1,10 @@
 package ats.entity;
 
+import ats.constant.JobStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -46,5 +49,6 @@ public class Job extends BaseEntity {
     private BigDecimal salaryMax;
 
     @Column(name = "status", columnDefinition = "VARCHAR(50)")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private JobStatus status;
 }

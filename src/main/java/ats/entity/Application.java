@@ -1,6 +1,5 @@
 package ats.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -39,8 +38,5 @@ public class Application extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "pipeline_stage_id")
     private PipelineStage pipelineStageId;
-
-    @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
 
 }

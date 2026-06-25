@@ -1,7 +1,11 @@
 package ats.entity;
 
+import ats.constant.InterviewResult;
+import ats.constant.InterviewStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -37,7 +41,8 @@ public class Interview extends BaseEntity{
     private String meetingLink;
 
     @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private InterviewStatus status;
 
     @Column(name  = "duration_minutes")
     private Integer durationMinutes;
@@ -46,7 +51,8 @@ public class Interview extends BaseEntity{
     private String feedBack;
 
     @Column(columnDefinition = "NVARCHAR(50)")
-    private String result;
+    @Enumerated(EnumType.STRING)
+    private InterviewResult result;
 
 }
 

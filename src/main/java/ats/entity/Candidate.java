@@ -26,9 +26,6 @@ public class Candidate extends BaseEntity {
     @Column(columnDefinition = "NVARCHAR(255)")
     private String email;
 
-    @Column(columnDefinition = "NVARCHAR(50)")
-    private String status;
-
     @Column(columnDefinition = "NVARCHAR(30)")
     private String phone;
 
