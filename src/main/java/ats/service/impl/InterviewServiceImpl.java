@@ -49,7 +49,7 @@ public class InterviewServiceImpl implements InterviewService {
                 pagingRequest.getSize()
         );
 
-        Page<Interview> interviews = interviewRepository.findByInterviewerId_Id(
+        Page<Interview> interviews = interviewRepository.findAssignedInterviews(
                 interviewer.getId(),
                 pagingRequest.toPageable(Sort.by(Sort.Direction.ASC, "scheduledAt"))
         );
@@ -65,7 +65,7 @@ public class InterviewServiceImpl implements InterviewService {
             Principal principal
     ) {
         User interviewer = getInterviewerFromPrincipal(principal);
-        Interview interview = interviewRepository.findByIdAndInterviewerId_Id(
+        Interview interview = interviewRepository.findAssignedInterviewById(
                         interviewId,
                         interviewer.getId()
                 )
