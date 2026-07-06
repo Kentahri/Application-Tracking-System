@@ -89,7 +89,7 @@ public class ApplicationInitConfig {
                     userRepository,
                     "interviewer@ats.local",
                     "Interview One",
-                    UserRole.INTERVIEW,
+                    UserRole.INTERVIEWER,
                     engineering
             );
 
@@ -196,6 +196,7 @@ public class ApplicationInitConfig {
             getOrCreateInterview(
                     interviewRepository,
                     appC,
+                    interviewer,
                     LocalDateTime.now().plusDays(2).withHour(10).withMinute(0).withSecond(0).withNano(0),
                     "https://meet.example.com/frontend-candidate-three",
                     InterviewStatus.SCHEDULED,
@@ -361,19 +362,27 @@ public class ApplicationInitConfig {
 
     private Interview getOrCreateInterview(InterviewRepository repository,
                                            Application application,
+                                           User interviewer,
                                            LocalDateTime scheduledAt,
                                            String meetingLink,
                                            InterviewStatus status,
                                            Integer durationMinutes,
                                            String feedback,
                                            InterviewResult result) {
-        if (repository.existsByApplicationId_Id(application.getId())) {
-            return null;
+        Interview existingInterview = repository.findByApplicationId_Id(application.getId()).orElse(null);
+        if (existingInterview != null) {
+            if (existingInterview.getInterviewerId() == null) {
+                existingInterview.setInterviewerId(interviewer);
+                existingInterview.setUpdatedAt(LocalDateTime.now());
+                return repository.save(existingInterview);
+            }
+            return existingInterview;
         }
 
         Interview interview = new Interview();
         initBase(interview);
         interview.setApplicationId(application);
+        interview.setInterviewerId(interviewer);
         interview.setScheduledAt(scheduledAt);
         interview.setMeetingLink(meetingLink);
         interview.setStatus(status);
