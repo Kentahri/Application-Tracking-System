@@ -1,5 +1,6 @@
 package ats.dto.auth;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,5 +17,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank
+    @JsonAlias("password")
     private String hashPassword;
 }
