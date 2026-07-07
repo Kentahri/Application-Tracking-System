@@ -36,6 +36,10 @@ public class Interview extends BaseEntity{
     @JoinColumn(name = "application_id")
     private Application applicationId;
 
+    @ManyToOne
+    @JoinColumn(name = "interviewer_id")
+    private User interviewerId;
+
     @Column(name = "scheduled_at")
     private LocalDateTime scheduledAt;
 
@@ -49,7 +53,7 @@ public class Interview extends BaseEntity{
     @Column(name  = "duration_minutes")
     private Integer durationMinutes;
 
-    @Column(name = "feed_back")
+    @Column(name = "feed_back", columnDefinition = "NVARCHAR(2000)")
     private String feedBack;
 
     @Column(columnDefinition = "NVARCHAR(50)")
