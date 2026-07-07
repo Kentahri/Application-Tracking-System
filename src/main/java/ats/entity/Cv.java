@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -17,6 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "cvs")
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Getter
 @Setter
 @ToString
@@ -31,7 +33,10 @@ public class Cv extends BaseEntity{
     @Column(name = "file_path", columnDefinition = "NVARCHAR(1000)")
     private String filePath;
 
-    @Column(name = "file_type", columnDefinition = "NVARCHAR(50)")
+    @Column(name = "file_name", columnDefinition = "NVARCHAR(500)")
+    private String fileName;
+
+    @Column(name = "file_type", columnDefinition = "NVARCHAR(255)")
     private String fileType;
 
 }

@@ -24,7 +24,11 @@ public class MessageHelper {
         try {
             return messageSource.getMessage(key, args, LocaleContextHolder.getLocale());
         } catch (Exception e) {
-            return messageSource.getMessage(key, args, VI_LOCALE);
+            try {
+                return messageSource.getMessage(key, args, VI_LOCALE);
+            } catch (Exception ex) {
+                return key;
+            }
         }
     }
 

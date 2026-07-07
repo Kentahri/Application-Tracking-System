@@ -8,6 +8,9 @@ import ats.dto.interview.CreateInterviewRequest;
 import ats.dto.interview.InterviewScheduleResponse;
 
 import java.security.Principal;
+import ats.dto.application.ApplyResponse;
+import ats.dto.application.ApplyUploadRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ApplicationService {
 
@@ -15,6 +18,7 @@ public interface ApplicationService {
 
     MoveApplicationStageResponse review(Long applicationId, ApplicationReviewRequest request, Principal principal);
 
+    ApplyResponse applyUpload(Long jobId, ApplyUploadRequest request, MultipartFile file);
     MoveApplicationStageResponse moveStage(Long applicationId, MoveApplicationStageRequest request, Principal principal);
 
     InterviewScheduleResponse createInterview(Long applicationId, CreateInterviewRequest request, Principal principal);

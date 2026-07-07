@@ -19,6 +19,7 @@ import java.util.List;
 public interface JobMapper {
 
     @Mapping(target = "departmentId", source = "departmentId.id")
+    @Mapping(target = "departmentName", source = "departmentId.departmentName")
     @Mapping(target = "recruiterId", source = "recruiterId.id")
     @Mapping(target = "applicationCount", ignore = true)
     JobResponse toDto(Job job);

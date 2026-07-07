@@ -17,6 +17,25 @@ spring:
   messages:
     basename: i18n/messages
     encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+file:
+  cv:
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:admin}
+    secret-key: ${MINIO_SECRET_KEY:admin123456}
+    bucket: ${MINIO_BUCKET:ats}
+    base-path: cvs
+    create-bucket: true
+    presign-expiry: 15m
+    timeouts:
+      connect: 5s
+      read: 30s
+      write: 30s
+      call: 60s
