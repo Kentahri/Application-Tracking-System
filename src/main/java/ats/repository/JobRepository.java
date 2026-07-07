@@ -12,9 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 public interface JobRepository extends JpaRepository<Job, Long> {
 
@@ -29,7 +31,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query(value = "SELECT j FROM Job j JOIN FETCH j.departmentId WHERE j.status = :status",
            countQuery = "SELECT count(j) FROM Job j WHERE j.status = :status")
     Page<Job> findByStatusWithDepartment(@Param("status") JobStatus status, Pageable pageable);
-}
 
     @Query(
             value = """

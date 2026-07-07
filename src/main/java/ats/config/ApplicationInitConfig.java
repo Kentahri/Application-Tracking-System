@@ -185,6 +185,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1500),
                     BigDecimal.valueOf(2800),
+                    LocalDate.now().plusDays(35),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -196,6 +197,7 @@ public class ApplicationInitConfig {
                     "Remote",
                     BigDecimal.valueOf(1800),
                     BigDecimal.valueOf(3200),
+                    LocalDate.now().plusDays(40),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -207,6 +209,7 @@ public class ApplicationInitConfig {
                     "Da Nang",
                     BigDecimal.valueOf(1100),
                     BigDecimal.valueOf(2200),
+                    LocalDate.now().plusDays(32),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterB
@@ -218,6 +221,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(2000),
                     BigDecimal.valueOf(3500),
+                    LocalDate.now().plusDays(50),
                     JobStatus.PUBLISHED,
                     dataAnalytics,
                     recruiterA
@@ -229,6 +233,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(1300),
                     BigDecimal.valueOf(2400),
+                    LocalDate.now().plusDays(42),
                     JobStatus.PUBLISHED,
                     dataAnalytics,
                     recruiterB
@@ -240,6 +245,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(2200),
                     BigDecimal.valueOf(3800),
+                    LocalDate.now().plusDays(55),
                     JobStatus.PUBLISHED,
                     security,
                     recruiterA
@@ -251,6 +257,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(1400),
                     BigDecimal.valueOf(2500),
+                    LocalDate.now().plusDays(47),
                     JobStatus.PUBLISHED,
                     security,
                     recruiterB
@@ -262,6 +269,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1600),
                     BigDecimal.valueOf(2600),
+                    LocalDate.now().plusDays(38),
                     JobStatus.PUBLISHED,
                     finance,
                     recruiterA
@@ -273,6 +281,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(1500),
                     BigDecimal.valueOf(2800),
+                    LocalDate.now().plusDays(65),
                     JobStatus.DRAFT,
                     finance,
                     recruiterB
@@ -284,6 +293,7 @@ public class ApplicationInitConfig {
                     "Remote",
                     BigDecimal.valueOf(700),
                     BigDecimal.valueOf(1200),
+                    LocalDate.now().plusDays(28),
                     JobStatus.PUBLISHED,
                     marketing,
                     recruiterB
@@ -295,6 +305,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1700),
                     BigDecimal.valueOf(3000),
+                    LocalDate.now().plusDays(44),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -306,6 +317,7 @@ public class ApplicationInitConfig {
                     "Da Nang",
                     BigDecimal.valueOf(900),
                     BigDecimal.valueOf(1600),
+                    LocalDate.now().minusDays(3),
                     JobStatus.CLOSED,
                     operations,
                     recruiterB
@@ -317,6 +329,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(800),
                     BigDecimal.valueOf(1400),
+                    LocalDate.now().plusDays(36),
                     JobStatus.PUBLISHED,
                     humanResources,
                     recruiterA

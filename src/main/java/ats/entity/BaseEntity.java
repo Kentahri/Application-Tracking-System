@@ -16,7 +16,6 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
-@EntityListeners(BaseEntity.BaseEntityListener.class)
 @Getter
 @Setter
 @SuperBuilder
