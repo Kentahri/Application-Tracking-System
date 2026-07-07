@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +33,9 @@ public class JobRequest {
     private BigDecimal salaryMin;
 
     private BigDecimal salaryMax;
+
+    @NotNull(message = "{validation.job.deadline.null}")
+    private LocalDate deadline;
 
     private JobStatus status;
 }

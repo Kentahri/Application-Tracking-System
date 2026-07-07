@@ -13,9 +13,9 @@ class PipelineStageMappingTest {
         Table table = PipelineStage.class.getAnnotation(Table.class);
         SQLDelete sqlDelete = PipelineStage.class.getAnnotation(SQLDelete.class);
 
-        assertEquals("pineline_stages", table.name());
+        assertEquals("pipeline_stages", table.name());
         assertEquals(
-                "UPDATE pineline_stages SET is_deleted = 1 WHERE id = ? and is_deleted = 0",
+                "UPDATE pipeline_stages SET is_deleted = 1, update_at = CURRENT_TIMESTAMP, deleted_at = CURRENT_TIMESTAMP WHERE id = ? and is_deleted = 0",
                 sqlDelete.sql()
         );
     }

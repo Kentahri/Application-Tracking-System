@@ -20,6 +20,7 @@ public interface JobMapper {
 
     @Mapping(target = "departmentId", source = "departmentId.id")
     @Mapping(target = "recruiterId", source = "recruiterId.id")
+    @Mapping(target = "applicationCount", ignore = true)
     JobResponse toDto(Job job);
 
     List<JobResponse> toDto(List<Job> jobs);

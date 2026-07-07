@@ -8,10 +8,30 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.List;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     Optional<Interview> findByApplicationId_Id(Long applicationId);
+
+    boolean existsByApplicationId_Id(Long applicationId);
+
+    @Query("""
+            select i
+            from Interview i
+            join fetch i.interviewerId
+            where i.applicationId.id = :applicationId
+            """)
+    Optional<Interview> findByApplicationIdWithInterviewer(@Param("applicationId") Long applicationId);
+
+    @Query("""
+            select i
+            from Interview i
+            join fetch i.interviewerId
+            join fetch i.applicationId a
+            where a.jobId.id = :jobId
+            """)
+    List<Interview> findByJobIdWithInterviewer(@Param("jobId") Long jobId);
 
     @Query("""
             select i
