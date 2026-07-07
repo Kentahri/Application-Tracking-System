@@ -16,7 +16,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE candidates SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLDelete(sql = "UPDATE candidates SET is_deleted = 1, update_at = CURRENT_TIMESTAMP, deleted_at = CURRENT_TIMESTAMP WHERE id = ? and is_deleted = 0")
 @SQLRestriction("is_deleted = 0")
 public class Candidate extends BaseEntity {
 
