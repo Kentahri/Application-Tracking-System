@@ -8,6 +8,7 @@ import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
 import ats.dto.job.JobUpdateRequest;
 import ats.entity.Application;
+import ats.entity.Interview;
 import ats.entity.Job;
 import ats.entity.PipelineStage;
 import ats.entity.User;
@@ -21,8 +22,10 @@ import ats.mapper.JobMapper;
 import ats.mapper.KanbanMapper;
 import ats.repository.ApplicationRepository;
 import ats.repository.DepartmentRepository;
+import ats.repository.InterviewRepository;
 import ats.repository.JobRepository;
 import ats.repository.PipelineStageRepository;
+import ats.repository.projection.JobWithApplicationCountProjection;
 import ats.repository.UserRepository;
 import ats.service.JobService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,12 +51,14 @@ import java.util.stream.Collectors;
 public class JobServiceImpl implements JobService {
 
     private static final JobStatus DEFAULT_STATUS = JobStatus.DRAFT;
+    private static final List<String> KANBAN_STAGE_NAMES = List.of("Applied", "Interview", "Offer", "Rejected");
 
     private final JobRepository jobRepository;
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
     private final PipelineStageRepository pipelineStageRepository;
     private final ApplicationRepository applicationRepository;
+    private final InterviewRepository interviewRepository;
     private final JobMapper jobMapper;
     private final KanbanMapper kanbanMapper;
 
@@ -95,6 +102,13 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    private void validateDeadline(LocalDate deadline) {
+        if (deadline == null || deadline.isBefore(LocalDate.now())) {
+            log.warn("Invalid job deadline: {}", deadline);
+            throw new BadRequestException(message("error.job.deadline.invalid"));
+        }
+    }
+
     private JobStatus normalizeStatus(JobStatus status) {
         if (status == null) {
             return DEFAULT_STATUS;
@@ -110,16 +124,26 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    private JobResponse toJobResponse(Job job, Long applicationCount) {
+        JobResponse response = jobMapper.toDto(job);
+        response.setApplicationCount(applicationCount != null ? applicationCount : 0L);
+        return response;
+    }
+
     @Override
-    public PageResponse<JobResponse> getAllJobs(Principal principal, PagingRequest pagingRequest) {
-        log.debug("getting recruiter jobs page: {}, size: {}", pagingRequest.getPage(), pagingRequest.getSize());
+    public PageResponse<JobResponse> getAllJobs(Principal principal, PagingRequest pagingRequest, JobStatus status) {
+        log.debug("getting recruiter jobs page: {}, size: {}, status: {}",
+                pagingRequest.getPage(),
+                pagingRequest.getSize(),
+                status);
 
         User recruiter = getRecruiterFromPrincipal(principal);
-        Page<Job> jobs = jobRepository.findByRecruiterId_Id(
+        Page<JobWithApplicationCountProjection> jobs = jobRepository.findByRecruiterIdWithApplicationCount(
                 recruiter.getId(),
+                status,
                 pagingRequest.toPageable(Sort.by(Sort.Direction.DESC, "id"))
         );
-        Page<JobResponse> responses = jobs.map(jobMapper::toDto);
+        Page<JobResponse> responses = jobs.map(job -> toJobResponse(job.getJob(), job.getApplicationCount()));
         return PageResponse.of(responses);
     }
 
@@ -140,7 +164,7 @@ public class JobServiceImpl implements JobService {
         log.debug("getting job by id: {}", id);
 
         Job job = getJobOrThrow(id);
-        return jobMapper.toDto(job);
+        return toJobResponse(job, applicationRepository.countByJobId_Id(id));
     }
 
     @Override
@@ -151,8 +175,15 @@ public class JobServiceImpl implements JobService {
         Job job = getJobOrThrow(jobId);
         validateRecruiterOwnsJob(job, recruiter);
 
-        List<PipelineStage> stages = pipelineStageRepository.findAllByOrderByStageOrderAsc();
+        List<PipelineStage> stages = pipelineStageRepository.findAllByStageNameInOrderByStageOrderAsc(KANBAN_STAGE_NAMES);
         List<Application> applications = applicationRepository.findByJobIdWithDetails(jobId);
+        Map<Long, Interview> interviewsByApplicationId = interviewRepository.findByJobIdWithInterviewer(jobId)
+                .stream()
+                .collect(Collectors.toMap(
+                        interview -> interview.getApplicationId().getId(),
+                        interview -> interview,
+                        (first, second) -> first
+                ));
         Map<Long, List<Application>> applicationsByStageId = applications.stream()
                 .collect(Collectors.groupingBy(application -> application.getPipelineStageId().getId()));
 
@@ -161,7 +192,10 @@ public class JobServiceImpl implements JobService {
                     List<KanbanApplicationResponse> applicationResponses = applicationsByStageId
                             .getOrDefault(stage.getId(), List.of())
                             .stream()
-                            .map(kanbanMapper::toApplicationResponse)
+                            .map(application -> kanbanMapper.toApplicationResponse(
+                                    application,
+                                    interviewsByApplicationId.get(application.getId())
+                            ))
                             .toList();
 
                     return kanbanMapper.toStageResponse(stage, applicationResponses);
@@ -185,17 +219,19 @@ public class JobServiceImpl implements JobService {
 
         validateDepartmentExists(request.getDepartmentId());
         validateSalaryRange(request.getSalaryMin(), request.getSalaryMax());
+        validateDeadline(request.getDeadline());
         User recruiter = getRecruiterFromPrincipal(principal);
 
         request.setTitle(title);
         request.setStatus(normalizeStatus(request.getStatus()));
 
         Job job = jobMapper.toEntity(request);
+        job.setIsDeleted(false);
         job.setRecruiterId(recruiter);
         Job saved = jobRepository.save(job);
 
         log.info("created job with id: {}", saved.getId());
-        return jobMapper.toDto(saved);
+        return toJobResponse(saved, 0L);
     }
 
     @Override
@@ -223,10 +259,16 @@ public class JobServiceImpl implements JobService {
         BigDecimal salaryMax = request.getSalaryMax() != null ? request.getSalaryMax() : job.getSalaryMax();
         validateSalaryRange(salaryMin, salaryMax);
 
-        jobMapper.updateEntity(request, job);
+        LocalDate deadline = request.getDeadline() != null ? request.getDeadline() : job.getDeadline();
+        JobStatus status = request.getStatus() != null ? request.getStatus() : job.getStatus();
+        if (request.getDeadline() != null || JobStatus.PUBLISHED.equals(status)) {
+            validateDeadline(deadline);
+        }
 
+        jobMapper.updateEntity(request, job);
+        job.setUpdatedAt(LocalDateTime.now());
         log.info("updated job id: {} with data: {}", id, request);
-        return jobMapper.toDto(job);
+        return toJobResponse(job, applicationRepository.countByJobId_Id(id));
     }
 
     @Override
@@ -235,6 +277,7 @@ public class JobServiceImpl implements JobService {
         log.info("deleting job with id: {}", id);
 
         Job job = getJobOrThrow(id);
+        job.setDeletedAt(LocalDateTime.now());
         jobRepository.delete(job);
         log.info("deleted job with id: {}", id);
     }

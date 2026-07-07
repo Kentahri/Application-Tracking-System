@@ -17,7 +17,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @SuperBuilder
 @Getter @Setter
-@SQLDelete(sql = "UPDATE departments SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
+@SQLDelete(sql = "UPDATE departments SET is_deleted = 1, update_at = CURRENT_TIMESTAMP, deleted_at = CURRENT_TIMESTAMP WHERE id = ? and is_deleted = 0")
 @SQLRestriction("is_deleted = 0")
 public class Department extends BaseEntity{
 
@@ -27,5 +27,6 @@ public class Department extends BaseEntity{
     @Column(name = "department_name", columnDefinition = "NVARCHAR(255)")
     private String departmentName;
 
+    @Column(columnDefinition = "NVARCHAR(1000)")
     private String description;
 }

@@ -39,26 +39,23 @@ public class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    public static class BaseEntityListener {
-
-        @PrePersist
-        void onPrePersist(Object entity) {
-            LocalDateTime now = LocalDateTime.now();
-            if (entity instanceof BaseEntity be) {
-                if (be.createdAt == null) {
-                    be.createdAt = now;
-                }
-                if (be.isDeleted == null) {
-                    be.isDeleted = false;
-                }
-            }
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = now;
         }
-
-        @PreUpdate
-        void onPreUpdate(Object entity) {
-            if (entity instanceof BaseEntity be) {
-                be.updatedAt = LocalDateTime.now();
-            }
+        if (updatedAt == null) {
+            updatedAt = createdAt;
+        }
+        if (isDeleted == null) {
+            isDeleted = false;
         }
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 }
