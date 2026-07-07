@@ -3,5 +3,6 @@ package ats.constant;
 public enum UserRole {
     ADMIN,
     RECRUITER,
-    INTERVIEW
+    INTERVIEW,
+    CANDIDATE
 }

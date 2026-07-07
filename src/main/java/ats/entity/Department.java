@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -14,6 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "departments")
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Getter @Setter
 @SQLDelete(sql = "UPDATE departments SET is_deleted = 1 WHERE id = ? and is_deleted = 0")
 @SQLRestriction("is_deleted = 0")
