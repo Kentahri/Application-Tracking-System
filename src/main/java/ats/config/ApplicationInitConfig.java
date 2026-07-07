@@ -63,6 +63,30 @@ public class ApplicationInitConfig {
                     null,
                     "Brand and growth"
             );
+            Department finance = getOrCreateDepartment(
+                    departmentRepository,
+                    "Finance",
+                    null,
+                    "Treasury, risk, and financial operations"
+            );
+            Department operations = getOrCreateDepartment(
+                    departmentRepository,
+                    "Operations",
+                    null,
+                    "Business operations and support"
+            );
+            Department dataAnalytics = getOrCreateDepartment(
+                    departmentRepository,
+                    "Data & Analytics",
+                    null,
+                    "Data platform and business intelligence"
+            );
+            Department security = getOrCreateDepartment(
+                    departmentRepository,
+                    "Information Security",
+                    null,
+                    "Cybersecurity and compliance"
+            );
 
             User admin = getOrCreateUser(
                     userRepository,
@@ -91,6 +115,13 @@ public class ApplicationInitConfig {
                     "Interview One",
                     UserRole.INTERVIEWER,
                     engineering
+            );
+            User candidate = getOrCreateUser(
+                    userRepository,
+                    "candidate@ats.local",
+                    "Candidate User",
+                    UserRole.CANDIDATE,
+                    null
             );
 
             PipelineStage applied = getOrCreateStage(pipelineStageRepository, "Applied", 1);
@@ -142,6 +173,149 @@ public class ApplicationInitConfig {
                     JobStatus.CLOSED,
                     marketing,
                     recruiterB
+            );
+            Job mobileJob = getOrCreateJob(
+                    jobRepository,
+                    "Mobile Developer (iOS/Android)",
+                    "Build cross-platform mobile apps for the ATS suite",
+                    "Ho Chi Minh City",
+                    BigDecimal.valueOf(1500),
+                    BigDecimal.valueOf(2800),
+                    JobStatus.PUBLISHED,
+                    engineering,
+                    recruiterA
+            );
+            Job devopsJob = getOrCreateJob(
+                    jobRepository,
+                    "DevOps Engineer",
+                    "Operate Kubernetes clusters and CI/CD pipelines",
+                    "Remote",
+                    BigDecimal.valueOf(1800),
+                    BigDecimal.valueOf(3200),
+                    JobStatus.PUBLISHED,
+                    engineering,
+                    recruiterA
+            );
+            Job qaJob = getOrCreateJob(
+                    jobRepository,
+                    "QA Engineer (Automation)",
+                    "Design end-to-end test suites with Playwright and Cypress",
+                    "Da Nang",
+                    BigDecimal.valueOf(1100),
+                    BigDecimal.valueOf(2200),
+                    JobStatus.PUBLISHED,
+                    engineering,
+                    recruiterB
+            );
+            Job dataEngineerJob = getOrCreateJob(
+                    jobRepository,
+                    "Data Engineer",
+                    "Build ETL pipelines and data lake on AWS",
+                    "Ho Chi Minh City",
+                    BigDecimal.valueOf(2000),
+                    BigDecimal.valueOf(3500),
+                    JobStatus.PUBLISHED,
+                    dataAnalytics,
+                    recruiterA
+            );
+            Job dataAnalystJob = getOrCreateJob(
+                    jobRepository,
+                    "Data Analyst",
+                    "Turn business questions into dashboards and insights",
+                    "Ha Noi",
+                    BigDecimal.valueOf(1300),
+                    BigDecimal.valueOf(2400),
+                    JobStatus.PUBLISHED,
+                    dataAnalytics,
+                    recruiterB
+            );
+            Job securityEngineerJob = getOrCreateJob(
+                    jobRepository,
+                    "Security Engineer",
+                    "Threat modeling, SAST/DAST, and incident response",
+                    "Ho Chi Minh City",
+                    BigDecimal.valueOf(2200),
+                    BigDecimal.valueOf(3800),
+                    JobStatus.PUBLISHED,
+                    security,
+                    recruiterA
+            );
+            Job complianceAnalystJob = getOrCreateJob(
+                    jobRepository,
+                    "Compliance Analyst",
+                    "Maintain ISO 27001 and internal control documentation",
+                    "Ha Noi",
+                    BigDecimal.valueOf(1400),
+                    BigDecimal.valueOf(2500),
+                    JobStatus.PUBLISHED,
+                    security,
+                    recruiterB
+            );
+            Job treasuryJob = getOrCreateJob(
+                    jobRepository,
+                    "Treasury Officer",
+                    "Manage daily cash position and FX exposure",
+                    "Ho Chi Minh City",
+                    BigDecimal.valueOf(1600),
+                    BigDecimal.valueOf(2600),
+                    JobStatus.PUBLISHED,
+                    finance,
+                    recruiterA
+            );
+            Job riskAnalystJob = getOrCreateJob(
+                    jobRepository,
+                    "Credit Risk Analyst",
+                    "Score SME loan applications and monitor portfolio risk",
+                    "Ha Noi",
+                    BigDecimal.valueOf(1500),
+                    BigDecimal.valueOf(2800),
+                    JobStatus.DRAFT,
+                    finance,
+                    recruiterB
+            );
+            Job contentWriterJob = getOrCreateJob(
+                    jobRepository,
+                    "Content Writer",
+                    "Write recruiting blog posts and social content",
+                    "Remote",
+                    BigDecimal.valueOf(700),
+                    BigDecimal.valueOf(1200),
+                    JobStatus.PUBLISHED,
+                    marketing,
+                    recruiterB
+            );
+            Job productDesignerJob = getOrCreateJob(
+                    jobRepository,
+                    "Product Designer (UX/UI)",
+                    "Design recruiter and candidate journeys in Figma",
+                    "Ho Chi Minh City",
+                    BigDecimal.valueOf(1700),
+                    BigDecimal.valueOf(3000),
+                    JobStatus.PUBLISHED,
+                    engineering,
+                    recruiterA
+            );
+            Job operationsAnalystJob = getOrCreateJob(
+                    jobRepository,
+                    "Operations Analyst",
+                    "Improve recruiting workflows with automation scripts",
+                    "Da Nang",
+                    BigDecimal.valueOf(900),
+                    BigDecimal.valueOf(1600),
+                    JobStatus.CLOSED,
+                    operations,
+                    recruiterB
+            );
+            Job recruiterCoordinatorJob = getOrCreateJob(
+                    jobRepository,
+                    "Recruiting Coordinator",
+                    "Schedule interviews and own candidate communication",
+                    "Ho Chi Minh City",
+                    BigDecimal.valueOf(800),
+                    BigDecimal.valueOf(1400),
+                    JobStatus.PUBLISHED,
+                    humanResources,
+                    recruiterA
             );
 
             Candidate candidateA = getOrCreateCandidate(

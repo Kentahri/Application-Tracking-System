@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 public class JobResponse {
     private Long id;
     private Long departmentId;
+    private String departmentName;
     private Long recruiterId;
     private String title;
     private String description;
