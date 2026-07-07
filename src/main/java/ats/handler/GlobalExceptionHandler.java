@@ -40,9 +40,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex,
-                                                                  @NonNull HttpHeaders headers,
-                                                                  @NonNull HttpStatusCode status,
-                                                                  @NonNull WebRequest request) {
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         log.error(ex.getMessage(), ex);
         Map<String, String> errors = extractFieldErrors(ex.getBindingResult());
         return badRequest(ResponseMessage.VALIDATION_FAILED, errors);
@@ -50,9 +50,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(@NonNull HttpMessageNotReadableException ex,
-                                                                  @NonNull HttpHeaders headers,
-                                                                  @NonNull HttpStatusCode status,
-                                                                  @NonNull WebRequest request) {
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         log.error(ex.getMessage(), ex);
         String message = (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage();
         return badRequest(ResponseMessage.INVALID, message);
@@ -60,27 +60,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotWritable(@NonNull HttpMessageNotWritableException ex,
-                                                                  @NonNull HttpHeaders headers,
-                                                                  @NonNull HttpStatusCode status,
-                                                                  @NonNull WebRequest request) {
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         log.error(ex.getMessage(), ex);
-        return ResponseBuilder.error(HttpStatus.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return ResponseBuilder.error(HttpStatus.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR,
+                ex.getMessage());
     }
 
     @Override
     protected ResponseEntity<Object> handleNoResourceFoundException(@NonNull NoResourceFoundException ex,
-                                                                    @NonNull HttpHeaders headers,
-                                                                    @NonNull HttpStatusCode status,
-                                                                    @NonNull WebRequest request) {
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         log.debug("NoResourceFoundException: {}", ex.getMessage());
         return ResponseBuilder.error(HttpStatus.NOT_FOUND, ResponseMessage.NOT_FOUND, ex.getMessage());
     }
 
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(@NonNull NoHandlerFoundException ex,
-                                                                   @NonNull HttpHeaders headers,
-                                                                   @NonNull HttpStatusCode status,
-                                                                   @NonNull WebRequest request) {
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         log.debug("NoHandlerFoundException: {}", ex.getMessage());
         return ResponseBuilder.error(HttpStatus.NOT_FOUND, ResponseMessage.NOT_FOUND, ex.getMessage());
     }
@@ -103,8 +104,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
         return badRequest(
                 ResponseMessage.VALIDATION_FAILED,
-                Map.of(ex.getFieldName(), ex.getErrorMessage())
-        );
+                Map.of(ex.getFieldName(), ex.getErrorMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
