@@ -124,6 +124,18 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public PageResponse<JobResponse> getAllPostedJobs(PagingRequest pagingRequest) {
+        log.debug("getting all posted jobs page: {}, size: {}", pagingRequest.getPage(), pagingRequest.getSize());
+
+        Page<Job> jobs = jobRepository.findByStatusWithDepartment(
+                JobStatus.PUBLISHED,
+                pagingRequest.toPageable(Sort.by(Sort.Direction.DESC, "id"))
+        );
+        Page<JobResponse> responses = jobs.map(jobMapper::toDto);
+        return PageResponse.of(responses);
+    }
+
+    @Override
     public JobResponse getJobById(Long id) {
         log.debug("getting job by id: {}", id);
 
