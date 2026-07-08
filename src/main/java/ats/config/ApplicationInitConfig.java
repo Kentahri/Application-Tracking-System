@@ -363,7 +363,7 @@ public class ApplicationInitConfig {
                     backendJob,
                     candidateA,
                     cvA,
-                    screening
+                    interviewStage
             );
             Application appB = getOrCreateApplication(
                     applicationRepository,
