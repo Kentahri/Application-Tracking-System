@@ -1,6 +1,9 @@
 package ats.service.impl;
 
 import ats.constant.JobStatus;
+import ats.constant.UserRole;
+import ats.constant.UserStatus;
+import ats.dto.interview.InterviewerResponse;
 import ats.dto.kanban.KanbanApplicationResponse;
 import ats.dto.kanban.KanbanBoardResponse;
 import ats.dto.kanban.KanbanStageResponse;
@@ -203,6 +206,31 @@ public class JobServiceImpl implements JobService {
                 .toList();
 
         return kanbanMapper.toBoardResponse(job, stageResponses, applications.size());
+    }
+
+    @Override
+    public List<InterviewerResponse> getInterviewersByJobDepartment(Long jobId, Principal principal) {
+        log.debug("getting interviewers for job id: {}", jobId);
+
+        User recruiter = getRecruiterFromPrincipal(principal);
+        Job job = getJobOrThrow(jobId);
+        validateRecruiterOwnsJob(job, recruiter);
+
+        Long departmentId = job.getDepartmentId() != null ? job.getDepartmentId().getId() : null;
+        if (departmentId == null) {
+            return List.of();
+        }
+
+        return userRepository
+                .findByRoleAndStatusAndDepartmentId_IdOrderByNameAsc(UserRole.INTERVIEWER, UserStatus.ACTIVE, departmentId)
+                .stream()
+                .map(interviewer -> new InterviewerResponse(
+                        interviewer.getId(),
+                        interviewer.getName(),
+                        interviewer.getEmail(),
+                        interviewer.getDepartmentId() != null ? interviewer.getDepartmentId().getId() : null
+                ))
+                .toList();
     }
 
     @Override

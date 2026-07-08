@@ -22,4 +22,6 @@ public interface ApplicationService {
     MoveApplicationStageResponse moveStage(Long applicationId, MoveApplicationStageRequest request, Principal principal);
 
     InterviewScheduleResponse createInterview(Long applicationId, CreateInterviewRequest request, Principal principal);
+
+    InterviewScheduleResponse updateInterview(Long applicationId, Long interviewId, CreateInterviewRequest request, Principal principal);
 }

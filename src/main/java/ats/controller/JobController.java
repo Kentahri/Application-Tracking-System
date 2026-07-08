@@ -1,6 +1,7 @@
 package ats.controller;
 
 import ats.constant.JobStatus;
+import ats.dto.interview.InterviewerResponse;
 import ats.dto.kanban.KanbanBoardResponse;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/recruiter/jobs")
@@ -88,6 +90,19 @@ public class JobController {
                                               Principal principal) {
         log.debug("REST request to get Kanban board for job id: {}", id);
         return jobService.getKanbanBoard(id, principal);
+    }
+
+    @GetMapping("/{jobId}/interviewers")
+    @Operation(summary = "Get interviewers by job department", description = "Get active interviewers in the same department as the job")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Interviewers retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated or access denied"),
+            @ApiResponse(responseCode = "404", description = "Job not found")
+    })
+    public List<InterviewerResponse> getInterviewers(@Parameter(description = "Job id") @PathVariable Long jobId,
+                                                     Principal principal) {
+        log.debug("REST request to get interviewers for job id: {}", jobId);
+        return jobService.getInterviewersByJobDepartment(jobId, principal);
     }
 
     @PostMapping
