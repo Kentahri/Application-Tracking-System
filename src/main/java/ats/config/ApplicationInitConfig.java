@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Configuration
@@ -125,10 +126,9 @@ public class ApplicationInitConfig {
             );
 
             PipelineStage applied = getOrCreateStage(pipelineStageRepository, "Applied", 1);
-            PipelineStage screening = getOrCreateStage(pipelineStageRepository, "Screening", 2);
-            PipelineStage interviewStage = getOrCreateStage(pipelineStageRepository, "Interview", 3);
-            PipelineStage offer = getOrCreateStage(pipelineStageRepository, "Offer", 4);
-            PipelineStage rejected = getOrCreateStage(pipelineStageRepository, "Rejected", 5);
+            PipelineStage interviewStage = getOrCreateStage(pipelineStageRepository, "Interview", 2);
+            PipelineStage offer = getOrCreateStage(pipelineStageRepository, "Offer", 3);
+            PipelineStage rejected = getOrCreateStage(pipelineStageRepository, "Rejected", 4);
 
             Job backendJob = getOrCreateJob(
                     jobRepository,
@@ -137,6 +137,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1200),
                     BigDecimal.valueOf(2500),
+                    LocalDate.now().plusDays(30),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -148,6 +149,7 @@ public class ApplicationInitConfig {
                     "Da Nang",
                     BigDecimal.valueOf(1000),
                     BigDecimal.valueOf(2200),
+                    LocalDate.now().plusDays(45),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -155,10 +157,11 @@ public class ApplicationInitConfig {
             Job hrInternJob = getOrCreateJob(
                     jobRepository,
                     "HR Intern",
-                    "Support screening and interview scheduling",
+                    "Support interview scheduling",
                     "Remote",
                     BigDecimal.valueOf(300),
                     BigDecimal.valueOf(600),
+                    LocalDate.now().plusDays(60),
                     JobStatus.DRAFT,
                     humanResources,
                     recruiterB
@@ -170,6 +173,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(800),
                     BigDecimal.valueOf(1500),
+                    LocalDate.now().minusDays(1),
                     JobStatus.CLOSED,
                     marketing,
                     recruiterB
@@ -181,6 +185,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1500),
                     BigDecimal.valueOf(2800),
+                    LocalDate.now().plusDays(35),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -192,6 +197,7 @@ public class ApplicationInitConfig {
                     "Remote",
                     BigDecimal.valueOf(1800),
                     BigDecimal.valueOf(3200),
+                    LocalDate.now().plusDays(40),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -203,6 +209,7 @@ public class ApplicationInitConfig {
                     "Da Nang",
                     BigDecimal.valueOf(1100),
                     BigDecimal.valueOf(2200),
+                    LocalDate.now().plusDays(32),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterB
@@ -214,6 +221,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(2000),
                     BigDecimal.valueOf(3500),
+                    LocalDate.now().plusDays(50),
                     JobStatus.PUBLISHED,
                     dataAnalytics,
                     recruiterA
@@ -225,6 +233,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(1300),
                     BigDecimal.valueOf(2400),
+                    LocalDate.now().plusDays(42),
                     JobStatus.PUBLISHED,
                     dataAnalytics,
                     recruiterB
@@ -236,6 +245,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(2200),
                     BigDecimal.valueOf(3800),
+                    LocalDate.now().plusDays(55),
                     JobStatus.PUBLISHED,
                     security,
                     recruiterA
@@ -247,6 +257,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(1400),
                     BigDecimal.valueOf(2500),
+                    LocalDate.now().plusDays(47),
                     JobStatus.PUBLISHED,
                     security,
                     recruiterB
@@ -258,6 +269,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1600),
                     BigDecimal.valueOf(2600),
+                    LocalDate.now().plusDays(38),
                     JobStatus.PUBLISHED,
                     finance,
                     recruiterA
@@ -269,6 +281,7 @@ public class ApplicationInitConfig {
                     "Ha Noi",
                     BigDecimal.valueOf(1500),
                     BigDecimal.valueOf(2800),
+                    LocalDate.now().plusDays(65),
                     JobStatus.DRAFT,
                     finance,
                     recruiterB
@@ -280,6 +293,7 @@ public class ApplicationInitConfig {
                     "Remote",
                     BigDecimal.valueOf(700),
                     BigDecimal.valueOf(1200),
+                    LocalDate.now().plusDays(28),
                     JobStatus.PUBLISHED,
                     marketing,
                     recruiterB
@@ -291,6 +305,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(1700),
                     BigDecimal.valueOf(3000),
+                    LocalDate.now().plusDays(44),
                     JobStatus.PUBLISHED,
                     engineering,
                     recruiterA
@@ -302,6 +317,7 @@ public class ApplicationInitConfig {
                     "Da Nang",
                     BigDecimal.valueOf(900),
                     BigDecimal.valueOf(1600),
+                    LocalDate.now().minusDays(3),
                     JobStatus.CLOSED,
                     operations,
                     recruiterB
@@ -313,6 +329,7 @@ public class ApplicationInitConfig {
                     "Ho Chi Minh City",
                     BigDecimal.valueOf(800),
                     BigDecimal.valueOf(1400),
+                    LocalDate.now().plusDays(36),
                     JobStatus.PUBLISHED,
                     humanResources,
                     recruiterA
@@ -363,9 +380,8 @@ public class ApplicationInitConfig {
                     interviewStage
             );
 
-            getOrCreateTransition(stageTransitionRepository, appA, applied, screening, "Passed resume screening");
-            getOrCreateTransition(stageTransitionRepository, appC, applied, screening, "Resume matched frontend role");
-            getOrCreateTransition(stageTransitionRepository, appC, screening, interviewStage, "Scheduled technical interview");
+            getOrCreateTransition(stageTransitionRepository, appA, applied, interviewStage, "Passed application review");
+            getOrCreateTransition(stageTransitionRepository, appC, applied, interviewStage, "Scheduled technical interview");
 
             getOrCreateInterview(
                     interviewRepository,
@@ -425,6 +441,11 @@ public class ApplicationInitConfig {
                                            Integer order) {
         PipelineStage stage = repository.findByStageName(name);
         if (stage != null) {
+            if (!order.equals(stage.getStageOrder())) {
+                stage.setStageOrder(order);
+                stage.setUpdatedAt(LocalDateTime.now());
+                return repository.save(stage);
+            }
             return stage;
         }
 
@@ -441,11 +462,17 @@ public class ApplicationInitConfig {
                                String location,
                                BigDecimal salaryMin,
                                BigDecimal salaryMax,
+                               LocalDate deadline,
                                JobStatus status,
                                Department department,
                                User recruiter) {
         Job job = repository.findByTitle(title);
         if (job != null) {
+            if (job.getDeadline() == null) {
+                job.setDeadline(deadline);
+                job.setUpdatedAt(LocalDateTime.now());
+                return repository.save(job);
+            }
             return job;
         }
 
@@ -458,6 +485,7 @@ public class ApplicationInitConfig {
         job.setLocation(location);
         job.setSalaryMin(salaryMin);
         job.setSalaryMax(salaryMax);
+        job.setDeadline(deadline);
         job.setStatus(status);
         return repository.save(job);
     }

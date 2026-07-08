@@ -1,5 +1,6 @@
 package ats.controller;
 
+import ats.constant.JobStatus;
 import ats.dto.kanban.KanbanBoardResponse;
 import ats.dto.job.JobRequest;
 import ats.dto.job.JobResponse;
@@ -47,9 +48,22 @@ public class JobController {
                                             @RequestParam(defaultValue = "1") int page,
                                             @Parameter(description = "Number of records per page")
                                             @RequestParam(defaultValue = "10") int size,
+                                            @Parameter(description = "Filter by job status")
+                                            @RequestParam(required = false) JobStatus status,
                                             Principal principal) {
-        log.debug("REST request to get recruiter jobs page: {}, size: {}", page, size);
-        return jobService.getAllJobs(principal, new PagingRequest(page, size));
+        log.debug("REST request to get recruiter jobs page: {}, size: {}, status: {}", page, size, status);
+        return jobService.getAllJobs(principal, new PagingRequest(page, size), status);
+    }
+
+    @GetMapping("/getAll")
+    @Operation(summary = "Get all posted jobs (public)", description = "Get paginated job postings that are currently open for applications (status = PUBLISHED). No authentication required.")
+    @ApiResponse(responseCode = "200", description = "Posted jobs retrieved successfully")
+    public PageResponse<JobResponse> getAllPublic(@Parameter(description = "Page number, starting from 1")
+                                                  @RequestParam(defaultValue = "1") int page,
+                                                  @Parameter(description = "Number of records per page")
+                                                  @RequestParam(defaultValue = "10") int size) {
+        log.debug("REST request to get posted jobs page: {}, size: {}", page, size);
+        return jobService.getAllPostedJobs(new PagingRequest(page, size));
     }
 
     @GetMapping("/getAll")

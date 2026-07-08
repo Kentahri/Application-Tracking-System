@@ -14,5 +14,7 @@ public interface PipelineStageRepository extends JpaRepository<PipelineStage, Lo
     PipelineStage findByStageName(String stageName);
 
     List<PipelineStage> findAllByOrderByStageOrderAsc();
+
+    List<PipelineStage> findAllByStageNameInOrderByStageOrderAsc(List<String> stageNames);
 }
 
