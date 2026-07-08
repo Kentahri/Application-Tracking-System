@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -82,6 +83,28 @@ public class ApplicationController {
                 request.getInterviewerId()
         );
         return applicationService.createInterview(applicationId, request, principal);
+    }
+
+    @PutMapping("/{applicationId}/interviews/{interviewId}")
+    @Operation(summary = "Update interview", description = "Update an interview schedule for an application")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Interview updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid stage, interviewer, request, or closed job"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated or access denied"),
+            @ApiResponse(responseCode = "404", description = "Application, interview, or interviewer not found")
+    })
+    public InterviewScheduleResponse updateInterview(
+            @Parameter(description = "Application id") @PathVariable Long applicationId,
+            @Parameter(description = "Interview id") @PathVariable Long interviewId,
+            @Valid @RequestBody CreateInterviewRequest request,
+            Principal principal) {
+        log.debug(
+                "REST request to update interview id: {} for application id: {} with interviewer id: {}",
+                interviewId,
+                applicationId,
+                request.getInterviewerId()
+        );
+        return applicationService.updateInterview(applicationId, interviewId, request, principal);
     }
 
     @PatchMapping("/{applicationId}/stage")
