@@ -21,8 +21,6 @@ import ats.entity.StageTransition;
 import ats.entity.User;
 import ats.dto.application.ApplyResponse;
 import ats.dto.application.ApplyUploadRequest;
-import ats.dto.application.MoveApplicationStageRequest;
-import ats.dto.application.MoveApplicationStageResponse;
 import ats.entity.*;
 import ats.exception.BadRequestException;
 import ats.exception.NotFoundException;
