@@ -323,6 +323,40 @@ public class ApplicationServiceImpl implements ApplicationService {
         return interviewMapper.toScheduleResponse(savedInterview);
     }
 
+    @Override
+    @Transactional
+    public InterviewScheduleResponse updateInterview(Long applicationId,
+                                                     Long interviewId,
+                                                     CreateInterviewRequest request,
+                                                     Principal principal) {
+        log.info("updating interview id: {} for application id: {}", interviewId, applicationId);
+
+        User recruiter = getRecruiterFromPrincipal(principal);
+        Application application = getApplicationOrThrow(applicationId);
+
+        validateRecruiterOwnsApplicationJob(application, recruiter);
+        validateJobIsMovable(application);
+        validateCurrentStage(application, STAGE_INTERVIEW);
+
+        Interview interview = getInterviewForApplicationOrThrow(applicationId, interviewId);
+        validateInterviewIsEditable(interview);
+
+        User interviewer = getInterviewerOrThrow(request.getInterviewerId());
+        validateInterviewer(interviewer);
+        validateInterviewerBelongsToJobDepartment(interviewer, application.getJobId());
+
+        interview.setInterviewerId(interviewer);
+        interview.setScheduledAt(request.getScheduledAt());
+        interview.setDurationMinutes(request.getDurationMinutes());
+        interview.setMeetingLink(normalizeText(request.getMeetingLink()));
+        interview.setFeedBack(normalizeText(request.getNote()));
+        interview.setUpdatedAt(LocalDateTime.now());
+
+        Interview savedInterview = interviewRepository.save(interview);
+        log.info("updated interview id: {} for application id: {}", interviewId, applicationId);
+        return interviewMapper.toScheduleResponse(savedInterview);
+    }
+
     public ApplyResponse applyUpload(Long jobId, ApplyUploadRequest req, MultipartFile file) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new NotFoundException("Job not found with id: " + jobId));
@@ -398,6 +432,37 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .email(req.getEmail())
                 .phone(req.getPhone())
                 .build());
+    }
+
+    private void validateInterviewIsEditable(Interview interview) {
+        if (interview.getStatus() != InterviewStatus.SCHEDULED) {
+            log.warn("Interview id: {} is not editable because status is: {}", interview.getId(), interview.getStatus());
+            throw new BadRequestException(message("error.interview.notEditable"));
+        }
+    }
+
+    private Interview getInterviewForApplicationOrThrow(Long applicationId, Long interviewId) {
+        return interviewRepository.findByIdAndApplicationIdWithDetails(interviewId, applicationId)
+                .orElseThrow(() -> {
+                    log.warn("Interview id: {} not found for application id: {}", interviewId, applicationId);
+                    return new NotFoundException(message("error.interview.notFound", interviewId));
+                });
+    }
+
+    private void validateInterviewerBelongsToJobDepartment(User interviewer, Job job) {
+        Long interviewerDepartmentId = interviewer.getDepartmentId() != null ? interviewer.getDepartmentId().getId() : null;
+        Long jobDepartmentId = job != null && job.getDepartmentId() != null ? job.getDepartmentId().getId() : null;
+
+        if (!Objects.equals(interviewerDepartmentId, jobDepartmentId)) {
+            log.warn(
+                    "Interviewer id: {} department id: {} does not match job id: {} department id: {}",
+                    interviewer.getId(),
+                    interviewerDepartmentId,
+                    job != null ? job.getId() : null,
+                    jobDepartmentId
+            );
+            throw new BadRequestException(message("error.interview.interviewer.department.invalid"));
+        }
     }
 
 }
