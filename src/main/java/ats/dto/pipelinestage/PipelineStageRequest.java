@@ -2,6 +2,7 @@ package ats.dto.pipelinestage;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class PipelineStageRequest {
     private String stageName;
 
     @NotNull(message = "validation.pipelineStage.stageOrder.null")
+    @Positive(message = "validation.pipelineStage.stageOrder.positive")
     private Integer stageOrder;
 }
 
