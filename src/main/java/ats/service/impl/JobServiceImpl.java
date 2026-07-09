@@ -31,6 +31,7 @@ import ats.repository.PipelineStageRepository;
 import ats.repository.projection.JobWithApplicationCountProjection;
 import ats.repository.UserRepository;
 import ats.service.JobService;
+import ats.service.JobVectorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -64,6 +65,7 @@ public class JobServiceImpl implements JobService {
     private final InterviewRepository interviewRepository;
     private final JobMapper jobMapper;
     private final KanbanMapper kanbanMapper;
+    private final JobVectorService jobVectorService;
 
     private String message(String code, Object... args) {
         return MessageHelper.getMessage(code, args);
@@ -257,6 +259,7 @@ public class JobServiceImpl implements JobService {
         job.setIsDeleted(false);
         job.setRecruiterId(recruiter);
         Job saved = jobRepository.save(job);
+        jobVectorService.upsert(saved.getId());
 
         log.info("created job with id: {}", saved.getId());
         return toJobResponse(saved, 0L);
@@ -295,6 +298,7 @@ public class JobServiceImpl implements JobService {
 
         jobMapper.updateEntity(request, job);
         job.setUpdatedAt(LocalDateTime.now());
+        jobVectorService.upsert(id);
         log.info("updated job id: {} with data: {}", id, request);
         return toJobResponse(job, applicationRepository.countByJobId_Id(id));
     }
@@ -307,6 +311,7 @@ public class JobServiceImpl implements JobService {
         Job job = getJobOrThrow(id);
         job.setDeletedAt(LocalDateTime.now());
         jobRepository.delete(job);
+        jobVectorService.delete(id);
         log.info("deleted job with id: {}", id);
     }
 }

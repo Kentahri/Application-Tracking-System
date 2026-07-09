@@ -35,6 +35,7 @@ import ats.repository.StageTransitionRepository;
 import ats.repository.UserRepository;
 import ats.repository.*;
 import ats.service.ApplicationService;
+import ats.service.CvTextExtractorService;
 import ats.storage.MinioStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +70,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final CandidateRepository candidateRepository;
     private final CvRepository cvRepository;
     private final MinioStorage minioStorage;
+    private final CvTextExtractorService cvTextExtractorService;
 
     private String message(String code, Object... args) {
         return MessageHelper.getMessage(code, args);
@@ -371,6 +373,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         Candidate candidate = resolveCandidate(req);
+        String parsedText = cvTextExtractorService.extract(file);
 
         MinioStorage.StoredResult stored;
         try {
@@ -384,6 +387,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .filePath(stored.storedKey())
                 .fileName(stored.fileName())
                 .fileType(stored.contentType())
+                .parsedText(parsedText)
+                .parsedAt(LocalDateTime.now())
                 .build();
         cv = cvRepository.save(cv);
 
@@ -419,8 +424,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             boolean phoneChanged = existing.getPhone() == null
                     && req.getPhone() != null
                     && !req.getPhone().isBlank();
-            if (phoneChanged) {
-                existing.setPhone(req.getPhone());
+            boolean statusMissing = existing.getCandidateStatus() == null;
+            if (phoneChanged || statusMissing) {
+                if (phoneChanged) {
+                    existing.setPhone(req.getPhone());
+                }
+                if (statusMissing) {
+                    existing.setCandidateStatus(UserStatus.ACTIVE);
+                }
                 return candidateRepository.save(existing);
             }
             return existing;
@@ -429,6 +440,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .name(req.getFullName())
                 .email(req.getEmail())
                 .phone(req.getPhone())
+                .candidateStatus(UserStatus.ACTIVE)
                 .build());
     }
 

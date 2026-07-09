@@ -35,6 +35,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApplicationInitConfig {
 
+    private static final int SAMPLE_CANDIDATE_QUERY_QUOTA = 2;
+
     PasswordEncoder passwordEncoder;
 
     @Bean
@@ -808,6 +810,10 @@ public class ApplicationInitConfig {
                 candidate.setPhone(phone);
                 changed = true;
             }
+            if (candidate.getNumberOfQueryQuota() == null || candidate.getNumberOfQueryQuota() <= 0) {
+                candidate.setNumberOfQueryQuota(SAMPLE_CANDIDATE_QUERY_QUOTA);
+                changed = true;
+            }
             if (changed) {
                 candidate.setUpdatedAt(LocalDateTime.now());
                 return repository.save(candidate);
@@ -821,6 +827,7 @@ public class ApplicationInitConfig {
         candidate.setName(name);
         candidate.setPasswordHash(passwordEncoder.encode("123456"));
         candidate.setPhone(phone);
+        candidate.setNumberOfQueryQuota(SAMPLE_CANDIDATE_QUERY_QUOTA);
         candidate.setCandidateStatus(UserStatus.ACTIVE);
         return repository.save(candidate);
     }
