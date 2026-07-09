@@ -21,8 +21,6 @@ import ats.entity.StageTransition;
 import ats.entity.User;
 import ats.dto.application.ApplyResponse;
 import ats.dto.application.ApplyUploadRequest;
-import ats.dto.application.MoveApplicationStageRequest;
-import ats.dto.application.MoveApplicationStageResponse;
 import ats.entity.*;
 import ats.exception.BadRequestException;
 import ats.exception.NotFoundException;
@@ -57,7 +55,6 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private static final String STAGE_APPLIED = "Applied";
     private static final String STAGE_INTERVIEW = "Interview";
-    private static final String STAGE_OFFER = "Offer";
     private static final String STAGE_REJECTED = "Rejected";
     private static final long MAX_FILE_SIZE_BYTES = 10L * 1024L * 1024L; // 10 MB
 
@@ -146,27 +143,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
-    private void validateStageTransition(Application application, PipelineStage fromStage, PipelineStage toStage) {
-        String fromStageName = fromStage != null ? fromStage.getStageName() : null;
-        String toStageName = toStage != null ? toStage.getStageName() : null;
-
-        boolean allowed =
-                (STAGE_APPLIED.equals(fromStageName)
-                        && (STAGE_INTERVIEW.equals(toStageName) || STAGE_REJECTED.equals(toStageName)))
-                        || (STAGE_INTERVIEW.equals(fromStageName)
-                        && (STAGE_OFFER.equals(toStageName) || STAGE_REJECTED.equals(toStageName)));
-
-        if (!allowed) {
-            log.warn(
-                    "Invalid stage transition for application id: {} from stage: {} to stage: {}",
-                    application.getId(),
-                    fromStageName,
-                    toStageName
-            );
-            throw new BadRequestException(message("error.application.stage.transition.invalid", fromStageName, toStageName));
-        }
-    }
-
     private User getInterviewerOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> {
@@ -183,37 +159,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (interviewer.getStatus() != UserStatus.ACTIVE) {
             log.warn("Interviewer id: {} is inactive", interviewer.getId());
             throw new BadRequestException(message("error.interview.interviewer.inactive"));
-        }
-    }
-
-    private void validateInterviewerBelongsToJobDepartment(User interviewer, Job job) {
-        Long interviewerDepartmentId = interviewer.getDepartmentId() != null ? interviewer.getDepartmentId().getId() : null;
-        Long jobDepartmentId = job != null && job.getDepartmentId() != null ? job.getDepartmentId().getId() : null;
-
-        if (!Objects.equals(interviewerDepartmentId, jobDepartmentId)) {
-            log.warn(
-                    "Interviewer id: {} department id: {} does not match job id: {} department id: {}",
-                    interviewer.getId(),
-                    interviewerDepartmentId,
-                    job != null ? job.getId() : null,
-                    jobDepartmentId
-            );
-            throw new BadRequestException(message("error.interview.interviewer.department.invalid"));
-        }
-    }
-
-    private Interview getInterviewForApplicationOrThrow(Long applicationId, Long interviewId) {
-        return interviewRepository.findByIdAndApplicationIdWithDetails(interviewId, applicationId)
-                .orElseThrow(() -> {
-                    log.warn("Interview id: {} not found for application id: {}", interviewId, applicationId);
-                    return new NotFoundException(message("error.interview.notFound", interviewId));
-                });
-    }
-
-    private void validateInterviewIsEditable(Interview interview) {
-        if (interview.getStatus() != InterviewStatus.SCHEDULED) {
-            log.warn("Interview id: {} is not editable because status is: {}", interview.getId(), interview.getStatus());
-            throw new BadRequestException(message("error.interview.notEditable"));
         }
     }
 
@@ -321,7 +266,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.warn("Application id: {} is already in stage id: {}", applicationId, toStage.getId());
             throw new BadRequestException(message("error.application.stage.same"));
         }
-        validateStageTransition(application, fromStage, toStage);
 
         LocalDateTime movedAt = LocalDateTime.now();
         application.setPipelineStageId(toStage);
@@ -359,7 +303,6 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         User interviewer = getInterviewerOrThrow(request.getInterviewerId());
         validateInterviewer(interviewer);
-        validateInterviewerBelongsToJobDepartment(interviewer, application.getJobId());
 
         LocalDateTime now = LocalDateTime.now();
         Interview interview = new Interview();
@@ -411,6 +354,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         log.info("updated interview id: {} for application id: {}", interviewId, applicationId);
         return interviewMapper.toScheduleResponse(savedInterview);
     }
+
     public ApplyResponse applyUpload(Long jobId, ApplyUploadRequest req, MultipartFile file) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new NotFoundException("Job not found with id: " + jobId));
@@ -486,6 +430,37 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .email(req.getEmail())
                 .phone(req.getPhone())
                 .build());
+    }
+
+    private void validateInterviewIsEditable(Interview interview) {
+        if (interview.getStatus() != InterviewStatus.SCHEDULED) {
+            log.warn("Interview id: {} is not editable because status is: {}", interview.getId(), interview.getStatus());
+            throw new BadRequestException(message("error.interview.notEditable"));
+        }
+    }
+
+    private Interview getInterviewForApplicationOrThrow(Long applicationId, Long interviewId) {
+        return interviewRepository.findByIdAndApplicationIdWithDetails(interviewId, applicationId)
+                .orElseThrow(() -> {
+                    log.warn("Interview id: {} not found for application id: {}", interviewId, applicationId);
+                    return new NotFoundException(message("error.interview.notFound", interviewId));
+                });
+    }
+
+    private void validateInterviewerBelongsToJobDepartment(User interviewer, Job job) {
+        Long interviewerDepartmentId = interviewer.getDepartmentId() != null ? interviewer.getDepartmentId().getId() : null;
+        Long jobDepartmentId = job != null && job.getDepartmentId() != null ? job.getDepartmentId().getId() : null;
+
+        if (!Objects.equals(interviewerDepartmentId, jobDepartmentId)) {
+            log.warn(
+                    "Interviewer id: {} department id: {} does not match job id: {} department id: {}",
+                    interviewer.getId(),
+                    interviewerDepartmentId,
+                    job != null ? job.getId() : null,
+                    jobDepartmentId
+            );
+            throw new BadRequestException(message("error.interview.interviewer.department.invalid"));
+        }
     }
 
 }
