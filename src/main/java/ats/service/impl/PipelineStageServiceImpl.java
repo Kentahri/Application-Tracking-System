@@ -71,6 +71,11 @@ public class PipelineStageServiceImpl implements PipelineStageService {
             throw new BadRequestException(message("error.pipelineStage.name.exists"));
         }
 
+        if (pipelineStageRepository.existsByStageOrder(request.getStageOrder())) {
+            log.warn("Pipeline stage order already exists: {}", request.getStageOrder());
+            throw new BadRequestException(message("error.pipelineStage.order.exists"));
+        }
+
         request.setStageName(stageName);
 
         PipelineStage pipelineStage = pipelineStageMapper.toEntity(request);
@@ -97,6 +102,12 @@ public class PipelineStageServiceImpl implements PipelineStageService {
                 throw new BadRequestException(message("error.pipelineStage.name.exists"));
             }
             request.setStageName(stageName);
+        }
+
+        if (request.getStageOrder() != null
+                && pipelineStageRepository.existsByStageOrderAndIdNot(request.getStageOrder(), id)) {
+            log.warn("Pipeline stage order already exists: {}", request.getStageOrder());
+            throw new BadRequestException(message("error.pipelineStage.order.exists"));
         }
 
         pipelineStageMapper.updateEntity(request, pipelineStage);
