@@ -2,8 +2,11 @@ package ats.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,13 +25,24 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("is_deleted = 0")
 public class Candidate extends BaseEntity {
 
+    @ManyToOne
+    @JoinColumn(name = "upgrade_package_id")
+    private UpgradePackage upgradePackageId;
+
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @Column(columnDefinition = "NVARCHAR(255)")
     private String email;
 
+    @Column(name = "password_hash", columnDefinition = "NVARCHAR(255)")
+    private String passwordHash;
+
     @Column(columnDefinition = "NVARCHAR(30)")
     private String phone;
+
+    @Builder.Default
+    @Column(name = "number_of_query_quota", nullable = false)
+    private Integer numberOfQueryQuota = 0;
 
 }

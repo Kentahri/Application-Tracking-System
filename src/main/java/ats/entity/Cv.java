@@ -14,6 +14,8 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "cvs")
 @NoArgsConstructor
@@ -39,4 +41,9 @@ public class Cv extends BaseEntity{
     @Column(name = "file_type", columnDefinition = "NVARCHAR(255)")
     private String fileType;
 
+    @Column(name = "parsed_text", columnDefinition = "NVARCHAR(MAX)")
+    private String parsedText;
+
+    @Column(name = "parsed_at")
+    private LocalDateTime parsedAt;
 }

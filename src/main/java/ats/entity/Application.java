@@ -1,10 +1,12 @@
 package ats.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,5 +42,9 @@ public class Application extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "pipeline_stage_id")
     private PipelineStage pipelineStageId;
+
+    @Builder.Default
+    @Column(name = "priority", nullable = false)
+    private Integer priority = 0;
 
 }
