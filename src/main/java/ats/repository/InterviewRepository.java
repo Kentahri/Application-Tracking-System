@@ -29,6 +29,21 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             from Interview i
             join fetch i.interviewerId
             join fetch i.applicationId a
+            join fetch a.candidateId
+            join fetch a.jobId
+            where i.id = :interviewId
+              and a.id = :applicationId
+            """)
+    Optional<Interview> findByIdAndApplicationIdWithDetails(
+            @Param("interviewId") Long interviewId,
+            @Param("applicationId") Long applicationId
+    );
+
+    @Query("""
+            select i
+            from Interview i
+            join fetch i.interviewerId
+            join fetch i.applicationId a
             where a.jobId.id = :jobId
             """)
     List<Interview> findByJobIdWithInterviewer(@Param("jobId") Long jobId);

@@ -117,6 +117,62 @@ public class ApplicationInitConfig {
                     UserRole.INTERVIEWER,
                     engineering
             );
+            User backendInterviewer = getOrCreateUser(
+                    userRepository,
+                    "backend.interviewer@ats.local",
+                    "Backend Interviewer",
+                    UserRole.INTERVIEWER,
+                    engineering
+            );
+            User frontendInterviewer = getOrCreateUser(
+                    userRepository,
+                    "frontend.interviewer@ats.local",
+                    "Frontend Interviewer",
+                    UserRole.INTERVIEWER,
+                    engineering
+            );
+            User dataInterviewer = getOrCreateUser(
+                    userRepository,
+                    "data.interviewer@ats.local",
+                    "Data Interviewer",
+                    UserRole.INTERVIEWER,
+                    dataAnalytics
+            );
+            User securityInterviewer = getOrCreateUser(
+                    userRepository,
+                    "security.interviewer@ats.local",
+                    "Security Interviewer",
+                    UserRole.INTERVIEWER,
+                    security
+            );
+            User financeInterviewer = getOrCreateUser(
+                    userRepository,
+                    "finance.interviewer@ats.local",
+                    "Finance Interviewer",
+                    UserRole.INTERVIEWER,
+                    finance
+            );
+            User marketingInterviewer = getOrCreateUser(
+                    userRepository,
+                    "marketing.interviewer@ats.local",
+                    "Marketing Interviewer",
+                    UserRole.INTERVIEWER,
+                    marketing
+            );
+            User hrInterviewer = getOrCreateUser(
+                    userRepository,
+                    "hr.interviewer@ats.local",
+                    "HR Interviewer",
+                    UserRole.INTERVIEWER,
+                    humanResources
+            );
+            User operationsInterviewer = getOrCreateUser(
+                    userRepository,
+                    "operations.interviewer@ats.local",
+                    "Operations Interviewer",
+                    UserRole.INTERVIEWER,
+                    operations
+            );
             User candidate = getOrCreateUser(
                     userRepository,
                     "candidate@ats.local",
@@ -353,10 +409,66 @@ public class ApplicationInitConfig {
                     "Candidate Three",
                     "0901000003"
             );
+            Candidate candidateD = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.mobile@example.com",
+                    "Mobile Candidate",
+                    "0901000004"
+            );
+            Candidate candidateE = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.devops@example.com",
+                    "DevOps Candidate",
+                    "0901000005"
+            );
+            Candidate candidateF = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.data@example.com",
+                    "Data Candidate",
+                    "0901000006"
+            );
+            Candidate candidateG = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.security@example.com",
+                    "Security Candidate",
+                    "0901000007"
+            );
+            Candidate candidateH = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.finance@example.com",
+                    "Finance Candidate",
+                    "0901000008"
+            );
+            Candidate candidateI = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.hr@example.com",
+                    "HR Candidate",
+                    "0901000009"
+            );
+            Candidate candidateJ = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.marketing@example.com",
+                    "Marketing Candidate",
+                    "0901000010"
+            );
+            Candidate candidateK = getOrCreateCandidate(
+                    candidateRepository,
+                    "candidate.qa@example.com",
+                    "QA Candidate",
+                    "0901000011"
+            );
 
             Cv cvA = getOrCreateCv(cvRepository, candidateA, "/sample/cvs/candidate-one.pdf", "PDF");
             Cv cvB = getOrCreateCv(cvRepository, candidateB, "/sample/cvs/candidate-two.pdf", "PDF");
             Cv cvC = getOrCreateCv(cvRepository, candidateC, "/sample/cvs/candidate-three.pdf", "PDF");
+            Cv cvD = getOrCreateCv(cvRepository, candidateD, "/sample/cvs/mobile-candidate.pdf", "PDF");
+            Cv cvE = getOrCreateCv(cvRepository, candidateE, "/sample/cvs/devops-candidate.pdf", "PDF");
+            Cv cvF = getOrCreateCv(cvRepository, candidateF, "/sample/cvs/data-candidate.pdf", "PDF");
+            Cv cvG = getOrCreateCv(cvRepository, candidateG, "/sample/cvs/security-candidate.pdf", "PDF");
+            Cv cvH = getOrCreateCv(cvRepository, candidateH, "/sample/cvs/finance-candidate.pdf", "PDF");
+            Cv cvI = getOrCreateCv(cvRepository, candidateI, "/sample/cvs/hr-candidate.pdf", "PDF");
+            Cv cvJ = getOrCreateCv(cvRepository, candidateJ, "/sample/cvs/marketing-candidate.pdf", "PDF");
+            Cv cvK = getOrCreateCv(cvRepository, candidateK, "/sample/cvs/qa-candidate.pdf", "PDF");
 
             Application appA = getOrCreateApplication(
                     applicationRepository,
@@ -379,16 +491,180 @@ public class ApplicationInitConfig {
                     cvC,
                     interviewStage
             );
+            Application appD = getOrCreateApplication(
+                    applicationRepository,
+                    mobileJob,
+                    candidateD,
+                    cvD,
+                    interviewStage
+            );
+            Application appE = getOrCreateApplication(
+                    applicationRepository,
+                    devopsJob,
+                    candidateE,
+                    cvE,
+                    interviewStage
+            );
+            Application appF = getOrCreateApplication(
+                    applicationRepository,
+                    dataEngineerJob,
+                    candidateF,
+                    cvF,
+                    interviewStage
+            );
+            Application appG = getOrCreateApplication(
+                    applicationRepository,
+                    securityEngineerJob,
+                    candidateG,
+                    cvG,
+                    interviewStage
+            );
+            Application appH = getOrCreateApplication(
+                    applicationRepository,
+                    treasuryJob,
+                    candidateH,
+                    cvH,
+                    interviewStage
+            );
+            Application appI = getOrCreateApplication(
+                    applicationRepository,
+                    recruiterCoordinatorJob,
+                    candidateI,
+                    cvI,
+                    interviewStage
+            );
+            Application appJ = getOrCreateApplication(
+                    applicationRepository,
+                    contentWriterJob,
+                    candidateJ,
+                    cvJ,
+                    interviewStage
+            );
+            Application appK = getOrCreateApplication(
+                    applicationRepository,
+                    qaJob,
+                    candidateK,
+                    cvK,
+                    interviewStage
+            );
 
             getOrCreateTransition(stageTransitionRepository, appA, applied, interviewStage, "Passed application review");
             getOrCreateTransition(stageTransitionRepository, appC, applied, interviewStage, "Scheduled technical interview");
+            getOrCreateTransition(stageTransitionRepository, appD, applied, interviewStage, "Mobile screen passed");
+            getOrCreateTransition(stageTransitionRepository, appE, applied, interviewStage, "DevOps screen passed");
+            getOrCreateTransition(stageTransitionRepository, appF, applied, interviewStage, "Data profile shortlisted");
+            getOrCreateTransition(stageTransitionRepository, appG, applied, interviewStage, "Security profile shortlisted");
+            getOrCreateTransition(stageTransitionRepository, appH, applied, interviewStage, "Finance profile shortlisted");
+            getOrCreateTransition(stageTransitionRepository, appI, applied, interviewStage, "Coordinator profile shortlisted");
+            getOrCreateTransition(stageTransitionRepository, appJ, applied, interviewStage, "Portfolio review passed");
+            getOrCreateTransition(stageTransitionRepository, appK, applied, interviewStage, "Automation assignment passed");
+
+            getOrCreateInterview(
+                    interviewRepository,
+                    appA,
+                    backendInterviewer,
+                    LocalDateTime.now().plusDays(1).withHour(9).withMinute(30).withSecond(0).withNano(0),
+                    "https://meet.example.com/backend-candidate-one",
+                    InterviewStatus.SCHEDULED,
+                    60,
+                    null,
+                    InterviewResult.PENDING
+            );
 
             getOrCreateInterview(
                     interviewRepository,
                     appC,
-                    interviewer,
+                    frontendInterviewer,
                     LocalDateTime.now().plusDays(2).withHour(10).withMinute(0).withSecond(0).withNano(0),
                     "https://meet.example.com/frontend-candidate-three",
+                    InterviewStatus.SCHEDULED,
+                    60,
+                    null,
+                    InterviewResult.PENDING
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appD,
+                    interviewer,
+                    LocalDateTime.now().plusDays(3).withHour(14).withMinute(0).withSecond(0).withNano(0),
+                    "https://meet.example.com/mobile-candidate",
+                    InterviewStatus.SCHEDULED,
+                    45,
+                    null,
+                    InterviewResult.PENDING
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appE,
+                    backendInterviewer,
+                    LocalDateTime.now().minusDays(1).withHour(15).withMinute(0).withSecond(0).withNano(0),
+                    "https://meet.example.com/devops-candidate",
+                    InterviewStatus.COMPLETED,
+                    60,
+                    "Strong Linux and CI/CD fundamentals",
+                    InterviewResult.PASS
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appF,
+                    dataInterviewer,
+                    LocalDateTime.now().plusDays(4).withHour(10).withMinute(30).withSecond(0).withNano(0),
+                    "https://meet.example.com/data-candidate",
+                    InterviewStatus.SCHEDULED,
+                    60,
+                    null,
+                    InterviewResult.PENDING
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appG,
+                    securityInterviewer,
+                    LocalDateTime.now().plusDays(5).withHour(9).withMinute(0).withSecond(0).withNano(0),
+                    "https://meet.example.com/security-candidate",
+                    InterviewStatus.SCHEDULED,
+                    60,
+                    null,
+                    InterviewResult.PENDING
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appH,
+                    financeInterviewer,
+                    LocalDateTime.now().plusDays(2).withHour(16).withMinute(0).withSecond(0).withNano(0),
+                    "https://meet.example.com/finance-candidate",
+                    InterviewStatus.SCHEDULED,
+                    45,
+                    null,
+                    InterviewResult.PENDING
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appI,
+                    hrInterviewer,
+                    LocalDateTime.now().plusDays(1).withHour(11).withMinute(0).withSecond(0).withNano(0),
+                    "https://meet.example.com/hr-candidate",
+                    InterviewStatus.SCHEDULED,
+                    30,
+                    null,
+                    InterviewResult.PENDING
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appJ,
+                    marketingInterviewer,
+                    LocalDateTime.now().minusDays(2).withHour(13).withMinute(30).withSecond(0).withNano(0),
+                    "https://meet.example.com/marketing-candidate",
+                    InterviewStatus.COMPLETED,
+                    45,
+                    "Good portfolio, needs stronger campaign metrics",
+                    InterviewResult.PASS
+            );
+            getOrCreateInterview(
+                    interviewRepository,
+                    appK,
+                    frontendInterviewer,
+                    LocalDateTime.now().plusDays(6).withHour(15).withMinute(30).withSecond(0).withNano(0),
+                    "https://meet.example.com/qa-candidate",
                     InterviewStatus.SCHEDULED,
                     60,
                     null,
