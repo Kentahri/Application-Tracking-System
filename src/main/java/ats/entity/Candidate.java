@@ -1,10 +1,7 @@
 package ats.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import ats.constant.UserStatus;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,5 +41,10 @@ public class Candidate extends BaseEntity {
     @Builder.Default
     @Column(name = "number_of_query_quota", nullable = false)
     private Integer numberOfQueryQuota = 0;
+
+    @Column(columnDefinition = "NVARCHAR(50)")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private UserStatus candidateStatus = UserStatus.ACTIVE;
 
 }
