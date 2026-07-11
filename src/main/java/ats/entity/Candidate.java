@@ -1,5 +1,7 @@
 package ats.entity;
 
+import ats.constant.UserStatus;
+import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,5 +56,10 @@ public class Candidate extends BaseEntity {
     @Builder.Default
     @Column(name = "number_of_query_quota", nullable = false)
     private Integer numberOfQueryQuota = 0;
+
+    @Column(columnDefinition = "NVARCHAR(50)")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private UserStatus candidateStatus = UserStatus.ACTIVE;
 
 }

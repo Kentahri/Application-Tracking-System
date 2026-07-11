@@ -17,6 +17,7 @@ import ats.repository.PipelineStageRepository;
 import ats.repository.StageTransitionRepository;
 import ats.repository.UpgradePackageRepository;
 import ats.repository.UserRepository;
+import ats.service.JobVectorService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,13 +29,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Configuration
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class ApplicationInitConfig {
 
-        PasswordEncoder passwordEncoder;
+    private static final int SAMPLE_CANDIDATE_QUERY_QUOTA = 2;
+
+    PasswordEncoder passwordEncoder;
 
     @Bean
     ApplicationRunner init(DepartmentRepository departmentRepository,
@@ -46,7 +50,8 @@ public class ApplicationInitConfig {
                            ApplicationRepository applicationRepository,
                            StageTransitionRepository stageTransitionRepository,
                            InterviewRepository interviewRepository,
-                           UpgradePackageRepository upgradePackageRepository) {
+                           UpgradePackageRepository upgradePackageRepository,
+                           JobVectorService jobVectorService) {
         return args -> {
             Department engineering = getOrCreateDepartment(
                     departmentRepository,
@@ -392,6 +397,26 @@ public class ApplicationInitConfig {
                     humanResources,
                     recruiterA
             );
+
+            List.of(
+                    backendJob,
+                    frontendJob,
+                    hrInternJob,
+                    marketingJob,
+                    mobileJob,
+                    devopsJob,
+                    qaJob,
+                    dataEngineerJob,
+                    dataAnalystJob,
+                    securityEngineerJob,
+                    complianceAnalystJob,
+                    treasuryJob,
+                    riskAnalystJob,
+                    contentWriterJob,
+                    productDesignerJob,
+                    operationsAnalystJob,
+                    recruiterCoordinatorJob
+            ).forEach(job -> jobVectorService.upsert(job.getId()));
 
             getOrCreateUpgradePackage(
                     upgradePackageRepository,
@@ -791,6 +816,27 @@ public class ApplicationInitConfig {
                                            String phone) {
         Candidate candidate = repository.findByEmail(email);
         if (candidate != null) {
+            boolean changed = false;
+            if (candidate.getCandidateStatus() == null) {
+                candidate.setCandidateStatus(UserStatus.ACTIVE);
+                changed = true;
+            }
+            if (candidate.getPasswordHash() == null || candidate.getPasswordHash().isBlank()) {
+                candidate.setPasswordHash(passwordEncoder.encode("123456"));
+                changed = true;
+            }
+            if (!phone.equals(candidate.getPhone())) {
+                candidate.setPhone(phone);
+                changed = true;
+            }
+            if (candidate.getNumberOfQueryQuota() == null || candidate.getNumberOfQueryQuota() <= 0) {
+                candidate.setNumberOfQueryQuota(SAMPLE_CANDIDATE_QUERY_QUOTA);
+                changed = true;
+            }
+            if (changed) {
+                candidate.setUpdatedAt(LocalDateTime.now());
+                return repository.save(candidate);
+            }
             return candidate;
         }
 
@@ -798,7 +844,10 @@ public class ApplicationInitConfig {
         initBase(candidate);
         candidate.setEmail(email);
         candidate.setName(name);
+        candidate.setPasswordHash(passwordEncoder.encode("123456"));
         candidate.setPhone(phone);
+        candidate.setNumberOfQueryQuota(SAMPLE_CANDIDATE_QUERY_QUOTA);
+        candidate.setCandidateStatus(UserStatus.ACTIVE);
         return repository.save(candidate);
     }
 

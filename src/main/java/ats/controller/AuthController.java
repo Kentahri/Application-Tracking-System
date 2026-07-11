@@ -31,4 +31,14 @@ public class AuthController {
     public LoginResponse login(@Valid @RequestBody LoginRequest req) {
         return authService.login(req);
     }
+
+    @PostMapping("/candidate/login")
+    @Operation(summary = "Candidate login", description = "Authenticate candidate credentials and return a JWT token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid email or password")
+    })
+    public LoginResponse candidateLogin(@Valid @RequestBody LoginRequest req) {
+        return authService.candidateLogin(req);
+    }
 }

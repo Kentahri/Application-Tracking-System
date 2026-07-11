@@ -40,6 +40,17 @@ file:
       write: 30s
       call: 60s
 
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  embedding-model: ${GEMINI_EMBEDDING_MODEL}
+  embedding-dimension: ${GEMINI_EMBEDDING_DIMENSION}
+  chat-model: ${GEMINI_CHAT_MODEL}
+
+qdrant:
+  url: ${QDRANT_URL}
+  collection: ${QDRANT_COLLECTION}
+  vector-size: ${QDRANT_VECTOR_SIZE}
+
 
 payment:
   vn-pay:

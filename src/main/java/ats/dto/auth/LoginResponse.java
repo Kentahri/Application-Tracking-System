@@ -1,6 +1,7 @@
 package ats.dto.auth;
 
 import ats.constant.UserRole;
+import ats.entity.Candidate;
 import ats.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,14 @@ public class LoginResponse {
         );
     }
 
+    public static LoginResponse fromCandidate(Candidate candidate, String accessToken) {
+        return new LoginResponse(
+                "Login successful",
+                accessToken,
+                UserInfo.from(candidate)
+        );
+    }
+
     @Getter
     @AllArgsConstructor
     public static class UserInfo {
@@ -41,6 +50,15 @@ public class LoginResponse {
                     user.getEmail(),
                     user.getName(),
                     user.getRole()
+            );
+        }
+
+        public static UserInfo from(Candidate candidate) {
+            return new UserInfo(
+                    candidate.getId(),
+                    candidate.getEmail(),
+                    candidate.getName(),
+                    UserRole.CANDIDATE
             );
         }
     }
