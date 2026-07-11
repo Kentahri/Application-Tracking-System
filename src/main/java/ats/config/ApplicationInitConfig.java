@@ -15,6 +15,7 @@ import ats.repository.InterviewRepository;
 import ats.repository.JobRepository;
 import ats.repository.PipelineStageRepository;
 import ats.repository.StageTransitionRepository;
+import ats.repository.UpgradePackageRepository;
 import ats.repository.UserRepository;
 import ats.service.JobVectorService;
 import lombok.AccessLevel;
@@ -49,6 +50,7 @@ public class ApplicationInitConfig {
                            ApplicationRepository applicationRepository,
                            StageTransitionRepository stageTransitionRepository,
                            InterviewRepository interviewRepository,
+                           UpgradePackageRepository upgradePackageRepository,
                            JobVectorService jobVectorService) {
         return args -> {
             Department engineering = getOrCreateDepartment(
@@ -415,6 +417,23 @@ public class ApplicationInitConfig {
                     operationsAnalystJob,
                     recruiterCoordinatorJob
             ).forEach(job -> jobVectorService.upsert(job.getId()));
+
+            getOrCreateUpgradePackage(
+                    upgradePackageRepository,
+                    "PRO",
+                    "Gói Pro dành cho ứng viên cần thêm lượt truy vấn",
+                    BigDecimal.valueOf(99000),
+                    50,
+                    1
+            );
+            getOrCreateUpgradePackage(
+                    upgradePackageRepository,
+                    "PREMIUM",
+                    "Gói Premium với nhiều lượt truy vấn và độ ưu tiên cao hơn",
+                    BigDecimal.valueOf(199000),
+                    150,
+                    2
+            );
 
             Candidate candidateA = getOrCreateCandidate(
                     candidateRepository,
@@ -919,10 +938,41 @@ public class ApplicationInitConfig {
         return repository.save(interview);
     }
 
-    private void initBase(BaseEntity entity) {
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
-        entity.setIsDeleted(false);
-    }
+        private UpgradePackage getOrCreateUpgradePackage(UpgradePackageRepository repository,
+                        String packageName,
+                        String description,
+                        BigDecimal price,
+                        Integer numberOfQueryQuota,
+                        Integer priority) {
+                UpgradePackage existing = repository.findByPackageName(packageName);
+                if (existing != null) {
+                        if (!java.util.Objects.equals(existing.getPrice(), price)
+                                        || !java.util.Objects.equals(existing.getNumberOfQueryQuota(), numberOfQueryQuota)
+                                        || !java.util.Objects.equals(existing.getPriority(), priority)) {
+                                existing.setDescription(description);
+                                existing.setPrice(price);
+                                existing.setNumberOfQueryQuota(numberOfQueryQuota);
+                                existing.setPriority(priority);
+                                existing.setUpdatedAt(LocalDateTime.now());
+                                return repository.save(existing);
+                        }
+                        return existing;
+                }
+
+                UpgradePackage pkg = new UpgradePackage();
+                initBase(pkg);
+                pkg.setPackageName(packageName);
+                pkg.setDescription(description);
+                pkg.setPrice(price);
+                pkg.setNumberOfQueryQuota(numberOfQueryQuota);
+                pkg.setPriority(priority);
+                return repository.save(pkg);
+        }
+
+        private void initBase(BaseEntity entity) {
+                LocalDateTime now = LocalDateTime.now();
+                entity.setCreatedAt(now);
+                entity.setUpdatedAt(now);
+                entity.setIsDeleted(false);
+        }
 }

@@ -8,4 +8,5 @@ public interface UpgradePackageRepository extends JpaRepository<UpgradePackage, 
     boolean existsByPackageName(String packageName);
 
     boolean existsByPackageNameAndIdNot(String packageName, Long id);
+    UpgradePackage findByPackageName(String packageName);
 }

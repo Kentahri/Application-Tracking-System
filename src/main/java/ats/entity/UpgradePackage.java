@@ -1,7 +1,10 @@
 package ats.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +16,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "upgrade_packages")
@@ -24,6 +29,10 @@ import java.math.BigDecimal;
 @SQLDelete(sql = "UPDATE upgrade_packages SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP, deleted_at = CURRENT_TIMESTAMP WHERE id = ? and is_deleted = 0")
 @SQLRestriction("is_deleted = 0")
 public class UpgradePackage extends BaseEntity {
+
+    @OneToMany(mappedBy = "upgradePackage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Payment> payments = new ArrayList<>();
 
     @Column(name = "package_name", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String packageName;

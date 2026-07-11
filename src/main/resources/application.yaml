@@ -10,7 +10,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto:  create
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -27,7 +27,7 @@ jwt:
 
 file:
   cv:
-    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    endpoint: ${MINIO_ENDPOINT}
     access-key: ${MINIO_ACCESS_KEY}
     secret-key: ${MINIO_SECRET_KEY}
     bucket: ${MINIO_BUCKET}
@@ -50,3 +50,20 @@ qdrant:
   url: ${QDRANT_URL}
   collection: ${QDRANT_COLLECTION}
   vector-size: ${QDRANT_VECTOR_SIZE}
+
+
+payment:
+  vn-pay:
+    pay-url: ${VNPAY_PAY_URL}
+    tmn-code: ${VNPAY_TMN_CODE}
+    secret-key: ${VNPAY_SECRET_KEY}
+    vnp-callback-url: ${VNPAY_CALLBACK_URL}
+    version: ${VNPAY_VERSION}
+    command: ${VNPAY_COMMAND}
+    order-type: ${VNPAY_ORDER_TYPE}
+
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
