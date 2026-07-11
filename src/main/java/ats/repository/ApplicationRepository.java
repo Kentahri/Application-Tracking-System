@@ -46,7 +46,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             join fetch a.cvId
             join fetch a.pipelineStageId
             where a.jobId.id = :jobId
-            order by a.id desc
+            order by coalesce(a.priority, 0) desc,
+                     a.createdAt desc,
+                     a.id desc
             """)
     List<Application> findByJobIdWithDetails(@Param("jobId") Long jobId);
 }

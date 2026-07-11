@@ -36,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApplicationInitConfig {
 
-    private static final int SAMPLE_CANDIDATE_QUERY_QUOTA = 2;
+    private static final int SAMPLE_CANDIDATE_QUERY_QUOTA = 10;
 
     PasswordEncoder passwordEncoder;
 
@@ -519,77 +519,88 @@ public class ApplicationInitConfig {
                     backendJob,
                     candidateA,
                     cvA,
-                    interviewStage
+                    interviewStage,
+                    2
             );
             Application appB = getOrCreateApplication(
                     applicationRepository,
                     backendJob,
                     candidateB,
                     cvB,
-                    applied
+                    applied,
+                    1
             );
             Application appC = getOrCreateApplication(
                     applicationRepository,
                     frontendJob,
                     candidateC,
                     cvC,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appD = getOrCreateApplication(
                     applicationRepository,
                     mobileJob,
                     candidateD,
                     cvD,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appE = getOrCreateApplication(
                     applicationRepository,
                     devopsJob,
                     candidateE,
                     cvE,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appF = getOrCreateApplication(
                     applicationRepository,
                     dataEngineerJob,
                     candidateF,
                     cvF,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appG = getOrCreateApplication(
                     applicationRepository,
                     securityEngineerJob,
                     candidateG,
                     cvG,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appH = getOrCreateApplication(
                     applicationRepository,
                     treasuryJob,
                     candidateH,
                     cvH,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appI = getOrCreateApplication(
                     applicationRepository,
                     recruiterCoordinatorJob,
                     candidateI,
                     cvI,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appJ = getOrCreateApplication(
                     applicationRepository,
                     contentWriterJob,
                     candidateJ,
                     cvJ,
-                    interviewStage
+                    interviewStage,
+                    0
             );
             Application appK = getOrCreateApplication(
                     applicationRepository,
                     qaJob,
                     candidateK,
                     cvK,
-                    interviewStage
+                    interviewStage,
+                    0
             );
 
             getOrCreateTransition(stageTransitionRepository, appA, applied, interviewStage, "Passed application review");
@@ -872,9 +883,14 @@ public class ApplicationInitConfig {
                                                Job job,
                                                Candidate candidate,
                                                Cv cv,
-                                               PipelineStage stage) {
+                                               PipelineStage stage,
+                                               Integer priority) {
         Application application = repository.findByCandidateId_IdAndJobId_Id(candidate.getId(), job.getId());
         if (application != null) {
+            if (priority != null && !java.util.Objects.equals(application.getPriority(), priority)) {
+                application.setPriority(priority);
+                return repository.save(application);
+            }
             return application;
         }
 
@@ -884,6 +900,7 @@ public class ApplicationInitConfig {
         application.setCandidateId(candidate);
         application.setCvId(cv);
         application.setPipelineStageId(stage);
+        application.setPriority(priority != null ? priority : 0);
         return repository.save(application);
     }
 

@@ -44,12 +44,15 @@ public class LoginResponse {
 
         private UserRole role;
 
+        private Integer numberOfQueryQuota;
+
         public static UserInfo from(User user) {
             return new UserInfo(
                     user.getId(),
                     user.getEmail(),
                     user.getName(),
-                    user.getRole()
+                    user.getRole(),
+                    null
             );
         }
 
@@ -58,7 +61,8 @@ public class LoginResponse {
                     candidate.getId(),
                     candidate.getEmail(),
                     candidate.getName(),
-                    UserRole.CANDIDATE
+                    UserRole.CANDIDATE,
+                    candidate.getNumberOfQueryQuota()
             );
         }
     }
