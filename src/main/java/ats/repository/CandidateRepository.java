@@ -10,7 +10,13 @@ import java.time.LocalDateTime;
 
 public interface CandidateRepository extends JpaRepository<Candidate, Long> {
 
-    Candidate findByEmail(String email);
+    @Query("""
+            select candidate
+            from Candidate candidate
+            left join fetch candidate.upgradePackageId
+            where candidate.email = :email
+            """)
+    Candidate findByEmail(@Param("email") String email);
 
     @Modifying
     @Query("""

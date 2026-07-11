@@ -46,23 +46,31 @@ public class LoginResponse {
 
         private Integer numberOfQueryQuota;
 
+        private String membershipName;
+
         public static UserInfo from(User user) {
             return new UserInfo(
                     user.getId(),
                     user.getEmail(),
                     user.getName(),
                     user.getRole(),
+                    null,
                     null
             );
         }
 
         public static UserInfo from(Candidate candidate) {
+            String membershipName = candidate.getUpgradePackageId() != null
+                    ? candidate.getUpgradePackageId().getPackageName()
+                    : null;
+
             return new UserInfo(
                     candidate.getId(),
                     candidate.getEmail(),
                     candidate.getName(),
                     UserRole.CANDIDATE,
-                    candidate.getNumberOfQueryQuota()
+                    candidate.getNumberOfQueryQuota(),
+                    membershipName
             );
         }
     }
