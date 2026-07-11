@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,19 +25,47 @@ public class GeminiChatServiceImpl implements GeminiChatService {
 
     @Override
     public String generate(String prompt) {
+        return generate(null, prompt);
+    }
+
+    @Override
+    public String generate(String systemPrompt, String userPrompt) {
+        return generateContent(systemPrompt, userPrompt, false);
+    }
+
+    @Override
+    public String generateJson(String systemPrompt, String userPrompt) {
+        return generateContent(systemPrompt, userPrompt, true);
+    }
+
+    private String generateContent(String systemPrompt, String userPrompt, boolean jsonResponse) {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/"
                 + model + ":generateContent?key=" + apiKey;
 
-        Map<String, Object> body = Map.of(
+        Map<String, Object> body = new HashMap<>();
+        body.put(
                 "contents", List.of(Map.of(
                         "role", "user",
-                        "parts", List.of(Map.of("text", prompt))
-                )),
-                "generationConfig", Map.of(
-                        "temperature", 0.3,
-                        "maxOutputTokens", 1200
-                )
+                        "parts", List.of(Map.of("text", userPrompt))
+                ))
         );
+
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("temperature", jsonResponse ? 0.1 : 0.5);
+        generationConfig.put("maxOutputTokens", jsonResponse ? 1800 : 2500);
+        if (jsonResponse) {
+            generationConfig.put("responseMimeType", "application/json");
+        }
+
+        body.put(
+                "generationConfig", generationConfig
+        );
+
+        if (systemPrompt != null && !systemPrompt.isBlank()) {
+            body.put("systemInstruction", Map.of(
+                    "parts", List.of(Map.of("text", systemPrompt))
+            ));
+        }
 
         Map<?, ?> response = restClient.post()
                 .uri(url)

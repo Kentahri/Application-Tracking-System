@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -54,6 +55,15 @@ public class CandidateCvAccessServiceImpl implements CandidateCvAccessService {
                     log.warn("Candidate id: {} attempted to access unavailable CV id: {}", candidate.getId(), cvId);
                     return new NotFoundException("CV not found");
                 });
+    }
+
+    @Override
+    public List<CandidateCvResponse> getOwnedCvs(Principal principal) {
+        Candidate candidate = getCurrentCandidate(principal);
+        return cvRepository.findTop5ByCandidateId_IdOrderByCreatedAtDesc(candidate.getId())
+                .stream()
+                .map(CandidateCvResponse::from)
+                .toList();
     }
 
     @Override

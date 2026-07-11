@@ -1,8 +1,8 @@
 package ats.service;
 
-import ats.entity.Job;
-
 import java.util.List;
+
+import ats.entity.Job;
 
 public interface QdrantService {
 
