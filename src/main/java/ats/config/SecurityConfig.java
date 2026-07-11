@@ -35,9 +35,7 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sess ->
-                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
                         // public
@@ -48,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/recruiter/jobs/getAll").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/jobs/*/apply").permitAll()
+                        .requestMatchers("/api/v1/vnpay/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/admin/departments/**").hasAnyRole("ADMIN", "RECRUITER")
 

@@ -153,6 +153,13 @@
                             <version>1.18.34</version>
                         </path>
 
+                        <!-- Lombok-MapStruct Binding -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+
                         <!-- MapStruct -->
                         <path>
                             <groupId>org.mapstruct</groupId>

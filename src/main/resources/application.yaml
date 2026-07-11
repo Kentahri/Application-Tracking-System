@@ -9,7 +9,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto:  none
+      ddl-auto:  create
     show-sql: true
     properties:
       hibernate:
@@ -39,3 +39,20 @@ file:
       read: 30s
       write: 30s
       call: 60s
+
+
+payment:
+  vn-pay:
+    pay-url: ${VNPAY_PAY_URL}
+    tmn-code: ${VNPAY_TMN_CODE}
+    secret-key: ${VNPAY_SECRET_KEY}
+    vnp-callback-url: ${VNPAY_CALLBACK_URL}
+    version: ${VNPAY_VERSION}
+    command: ${VNPAY_COMMAND}
+    order-type: ${VNPAY_ORDER_TYPE}
+
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
