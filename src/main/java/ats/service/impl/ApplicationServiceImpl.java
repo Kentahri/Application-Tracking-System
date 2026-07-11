@@ -357,7 +357,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         return interviewMapper.toScheduleResponse(savedInterview);
     }
 
-    public ApplyResponse applyUpload(Long jobId, ApplyUploadRequest req, MultipartFile file) {
+    public ApplyResponse applyUpload(Long jobId, ApplyUploadRequest req, MultipartFile file, Principal principal) {        
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new NotFoundException("Job not found with id: " + jobId));
 
@@ -372,7 +372,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new BadRequestException("validation.cvFile.tooLarge");
         }
 
-        Candidate candidate = resolveCandidate(req);
+        Candidate candidate = resolveCandidate(req, principal);
         String parsedText = cvTextExtractorService.extract(file);
 
         MinioStorage.StoredResult stored;
@@ -399,11 +399,16 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("No pipeline stage configured"));
 
+        Integer priority = (candidate.getUpgradePackageId() != null)
+                ? candidate.getUpgradePackageId().getPriority()
+                : 0;
+
         Application application = Application.builder()
                 .jobId(job)
                 .candidateId(candidate)
                 .cvId(cv)
                 .pipelineStageId(firstStage)
+                .priority(priority)
                 .build();
         application = applicationRepository.save(application);
 
@@ -418,8 +423,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 stored.contentType());
     }
 
-    private Candidate resolveCandidate(ApplyUploadRequest req) {
-        Candidate existing = candidateRepository.findByEmail(req.getEmail());
+    private Candidate resolveCandidate(ApplyUploadRequest req, Principal principal) {
+        Candidate existing = candidateRepository.findByEmail(principal.getName());
         if (existing != null) {
             boolean phoneChanged = existing.getPhone() == null
                     && req.getPhone() != null

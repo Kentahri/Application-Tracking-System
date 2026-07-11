@@ -4,12 +4,14 @@ import ats.constant.PaymentStatus;
 import ats.dto.vnpay.CallbackResponse;
 import ats.dto.vnpay.CreateVnPayRequest;
 import ats.dto.vnpay.VNPayResponse;
+import ats.entity.Application;
 import ats.entity.Candidate;
 import ats.entity.Payment;
 import ats.entity.UpgradePackage;
 import ats.exception.NotFoundException;
 import ats.helper.MessageHelper;
 import ats.config.VNPayConfig;
+import ats.repository.ApplicationRepository;
 import ats.repository.CandidateRepository;
 import ats.repository.PaymentRepository;
 import ats.repository.UpgradePackageRepository;
@@ -27,6 +29,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -45,6 +48,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final PaymentRepository paymentRepository;
     private final CandidateRepository candidateRepository;
     private final UpgradePackageRepository upgradePackageRepository;
+    private final ApplicationRepository applicationRepository;
     private final VNPayConfig vnPayConfig;
     private final VNPayUtil vnPayUtil;
 
@@ -166,7 +170,14 @@ public class VNPayServiceImpl implements VNPayService {
                 candidate.setNumberOfQueryQuota(currentQuota + pkg.getNumberOfQueryQuota());
                 candidate.setUpgradePackageId(pkg);
                 candidateRepository.save(candidate);
-                log.info("VNPay callback: candidate {} quota updated +{}", candidate.getId(), pkg.getNumberOfQueryQuota());
+
+                List<Application> applications = applicationRepository.findAllByCandidateId(candidate);
+                for (Application app : applications) {
+                    app.setPriority(pkg.getPriority());
+                }
+                applicationRepository.saveAll(applications);
+                log.info("VNPay callback: candidate {} quota updated +{}, priority updated to {} for {} applications",
+                        candidate.getId(), pkg.getNumberOfQueryQuota(), pkg.getPriority(), applications.size());
             }
         } else {
             payment.setStatus(PaymentStatus.FAILED);

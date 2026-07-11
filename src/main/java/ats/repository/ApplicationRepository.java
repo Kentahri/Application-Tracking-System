@@ -1,6 +1,7 @@
 package ats.repository;
 
 import ats.entity.Application;
+import ats.entity.Candidate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
     Application findByCandidateId_IdAndJobId_Id(Long candidateId, Long jobId);
+
+    List<Application> findAllByCandidateId(Candidate candidate);
 
     long countByJobId_Id(Long jobId);
 

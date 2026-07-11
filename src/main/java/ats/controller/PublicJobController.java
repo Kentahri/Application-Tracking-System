@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
@@ -30,24 +32,22 @@ public class PublicJobController {
     private final JobService jobService;
 
     @PostMapping(value = "/{jobId}/apply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(
-            summary = "Apply for a job by uploading CV file",
-            description = "Public endpoint. The candidate submits a multipart request with a JSON part 'data' "
-                    + "(fullName, email, phone, message) and a file part 'cvFile'. "
-                    + "The server stores the file in MinIO; only filePath is kept in DB."
-    )
+    @Operation(summary = "Apply for a job by uploading CV file", description = "Public endpoint. The candidate submits a multipart request with a JSON part 'data' "
+            + "(fullName, email, phone, message) and a file part 'cvFile'. "
+            + "The server stores the file in MinIO; only filePath is kept in DB.")
     public ResponseEntity<ApiResponse<ApplyResponse>> apply(
             @PathVariable Long jobId,
             @Valid @RequestPart("data") ApplyUploadRequest request,
-            @RequestPart("cvFile") MultipartFile cvFile) {
-        return ResponseBuilder.ok(applicationService.applyUpload(jobId, request, cvFile));
+            @RequestPart("cvFile") MultipartFile cvFile,
+            Principal principal) {
+        return ResponseBuilder.ok(applicationService.applyUpload(jobId, request, cvFile, principal));
     }
 
     @GetMapping("/getAll")
     @Operation(summary = "Get all posted jobs", description = "Get paginated job postings that are currently open for applications (status = PUBLISHED)")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Posted jobs retrieved successfully")
     public PageResponse<JobResponse> getAll(@RequestParam(defaultValue = "1") int page,
-                                            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size) {
         log.debug("REST request to get posted jobs page: {}, size: {}", page, size);
         return jobService.getAllPostedJobs(new PagingRequest(page, size));
     }
