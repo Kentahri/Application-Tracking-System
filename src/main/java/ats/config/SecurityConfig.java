@@ -45,8 +45,11 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/recruiter/jobs/getAll").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/recruiter/jobs/all").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/jobs/*/apply").permitAll()
-                        .requestMatchers("/api/v1/vnpay/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/vnpay/callback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/vnpay/create").hasRole("CANDIDATE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/vnpay/*").hasRole("CANDIDATE")
 
                         .requestMatchers(HttpMethod.GET, "/api/admin/departments/**").hasAnyRole("ADMIN", "RECRUITER")
 

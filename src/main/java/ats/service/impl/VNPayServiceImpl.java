@@ -9,6 +9,7 @@ import ats.entity.Candidate;
 import ats.entity.Payment;
 import ats.entity.UpgradePackage;
 import ats.exception.NotFoundException;
+import ats.exception.BadRequestException;
 import ats.helper.MessageHelper;
 import ats.config.VNPayConfig;
 import ats.repository.ApplicationRepository;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -37,13 +39,11 @@ import java.util.Map;
 @Slf4j
 public class VNPayServiceImpl implements VNPayService {
 
-    private static final ZoneId VIETNAM_ZONE =
-            ZoneId.of("Asia/Ho_Chi_Minh");
+        private static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
-    private static final DateTimeFormatter VNPAY_DATE_FORMAT =
-            DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        private static final DateTimeFormatter VNPAY_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-    private static final long PAYMENT_TIMEOUT_MINUTES = 15;
+        private static final long PAYMENT_TIMEOUT_MINUTES = 15;
 
     private final PaymentRepository paymentRepository;
     private final CandidateRepository candidateRepository;
@@ -52,22 +52,31 @@ public class VNPayServiceImpl implements VNPayService {
     private final VNPayConfig vnPayConfig;
     private final VNPayUtil vnPayUtil;
 
-    private String message(String code, Object... args) {
-        return MessageHelper.getMessage(code, args);
-    }
+    @Value("${payment.membership-duration-days:30}")
+    private long membershipDurationDays;
 
-    @Override
-    @Transactional
-    public VNPayResponse createVnPayPayment(CreateVnPayRequest req, HttpServletRequest httpReq) {
+        private String message(String code, Object... args) {
+                return MessageHelper.getMessage(code, args);
+        }
+
+        @Override
+        @Transactional
+    public VNPayResponse createVnPayPayment(
+            Long candidateId,
+            CreateVnPayRequest req,
+            HttpServletRequest httpReq) {
         log.info("VNPay: creating payment for candidateId={}, upgradePackageId={}",
-                req.getCandidateId(), req.getUpgradePackageId());
+                candidateId, req.getUpgradePackageId());
 
-        Candidate candidate = candidateRepository.findById(req.getCandidateId())
-                .orElseThrow(() -> new NotFoundException(message("candidate.notFound", req.getCandidateId())));
+        Candidate candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new NotFoundException(
+                        message("candidate.notFound", candidateId)));
 
         UpgradePackage upgradePackage = upgradePackageRepository.findById(req.getUpgradePackageId())
                 .orElseThrow(
                         () -> new NotFoundException(message("upgradePackage.notFound", req.getUpgradePackageId())));
+
+        validatePackageUpgrade(candidate, upgradePackage);
 
         String txnRef = vnPayUtil.getRandomNumber(8);
         String orderId = "ATS" + System.currentTimeMillis();
@@ -163,25 +172,28 @@ public class VNPayServiceImpl implements VNPayService {
             payment.setStatus(PaymentStatus.SUCCESS);
             payment.setPaidAt(LocalDateTime.now(VIETNAM_ZONE));
 
-            Candidate candidate = payment.getCandidate();
-            UpgradePackage pkg = payment.getUpgradePackage();
-            if (candidate != null && pkg != null) {
-                int currentQuota = candidate.getNumberOfQueryQuota() != null ? candidate.getNumberOfQueryQuota() : 0;
-                candidate.setNumberOfQueryQuota(currentQuota + pkg.getNumberOfQueryQuota());
-                candidate.setUpgradePackageId(pkg);
-                candidateRepository.save(candidate);
+                        Candidate candidate = payment.getCandidate();
+                        UpgradePackage pkg = payment.getUpgradePackage();
+                        if (candidate != null && pkg != null) {
+                                int currentQuota = candidate.getNumberOfQueryQuota() != null
+                                                ? candidate.getNumberOfQueryQuota()
+                                                : 0;
+                                candidate.setNumberOfQueryQuota(currentQuota + pkg.getNumberOfQueryQuota());
+                                candidate.setUpgradePackageId(pkg);
+                                candidateRepository.save(candidate);
 
-                List<Application> applications = applicationRepository.findAllByCandidateId(candidate);
-                for (Application app : applications) {
-                    app.setPriority(pkg.getPriority());
+                                List<Application> applications = applicationRepository.findAllByCandidateId(candidate);
+                                for (Application app : applications) {
+                                        app.setPriority(pkg.getPriority());
+                                }
+                                applicationRepository.saveAll(applications);
+                                log.info("VNPay callback: candidate {} quota updated +{}, priority updated to {} for {} applications",
+                                                candidate.getId(), pkg.getNumberOfQueryQuota(), pkg.getPriority(),
+                                                applications.size());
+                        }
+                } else {
+                        payment.setStatus(PaymentStatus.FAILED);
                 }
-                applicationRepository.saveAll(applications);
-                log.info("VNPay callback: candidate {} quota updated +{}, priority updated to {} for {} applications",
-                        candidate.getId(), pkg.getNumberOfQueryQuota(), pkg.getPriority(), applications.size());
-            }
-        } else {
-            payment.setStatus(PaymentStatus.FAILED);
-        }
 
         paymentRepository.save(payment);
         log.info("VNPay callback: processed txnRef={}, status={}, responseCode={}",
@@ -192,8 +204,9 @@ public class VNPayServiceImpl implements VNPayService {
 
     @Override
     @Transactional(readOnly = true)
-    public VNPayResponse getByTransactionId(String transactionId) {
-        Payment payment = paymentRepository.findByTransactionIdAndIsDeletedFalse(transactionId)
+    public VNPayResponse getByTransactionId(Long candidateId, String transactionId) {
+        Payment payment = paymentRepository
+                .findByTransactionIdAndCandidateId_IdAndIsDeletedFalse(transactionId, candidateId)
                 .orElseThrow(() -> new NotFoundException(
                         message("payment.notFound", transactionId)));
         return VNPayResponse.builder()
@@ -255,5 +268,29 @@ public class VNPayServiceImpl implements VNPayService {
         request.getParameterNames().asIterator()
                 .forEachRemaining(name -> map.put(name, request.getParameter(name)));
         return map;
+    }
+
+    private void validatePackageUpgrade(Candidate candidate, UpgradePackage requestedPackage) {
+        UpgradePackage currentPackage = candidate.getUpgradePackageId();
+        if (currentPackage == null) {
+            return;
+        }
+
+        Payment latestSuccessfulPayment = paymentRepository
+                .findTopByCandidateId_IdAndStatusAndIsDeletedFalseOrderByPaidAtDesc(
+                        candidate.getId(), PaymentStatus.SUCCESS)
+                .orElse(null);
+
+        boolean isCurrentPackageActive = latestSuccessfulPayment == null
+                || latestSuccessfulPayment.getPaidAt() == null
+                || latestSuccessfulPayment.getPaidAt()
+                        .plusDays(membershipDurationDays)
+                        .isAfter(LocalDateTime.now(VIETNAM_ZONE));
+
+        if (isCurrentPackageActive
+                && requestedPackage.getPriority() <= currentPackage.getPriority()) {
+            throw new BadRequestException(
+                    "Gói hiện tại vẫn còn hiệu lực. Bạn chỉ có thể nâng cấp lên gói cao hơn.");
+        }
     }
 }

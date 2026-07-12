@@ -7,9 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface VNPayService {
 
-    VNPayResponse createVnPayPayment(CreateVnPayRequest req, HttpServletRequest httpReq);
+    VNPayResponse createVnPayPayment(Long candidateId, CreateVnPayRequest req, HttpServletRequest httpReq);
 
     CallbackResponse handleCallback(HttpServletRequest httpReq);
 
-    VNPayResponse getByTransactionId(String transactionId);
+    VNPayResponse getByTransactionId(Long candidateId, String transactionId);
 }

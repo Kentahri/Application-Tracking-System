@@ -165,6 +165,15 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public List<JobResponse> getAllPostedJobsWithoutPaging() {
+        log.debug("getting all posted jobs without pagination");
+        return jobRepository.findAllByStatusWithDepartment(JobStatus.PUBLISHED)
+                .stream()
+                .map(jobMapper::toDto)
+                .toList();
+    }
+
+    @Override
     public JobResponse getJobById(Long id) {
         log.debug("getting job by id: {}", id);
 
