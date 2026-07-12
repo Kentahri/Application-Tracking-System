@@ -18,6 +18,8 @@ public interface JobService {
 
     PageResponse<JobResponse> getAllPostedJobs(PagingRequest pagingRequest);
 
+    List<JobResponse> getAllPostedJobsWithoutPaging();
+
     JobResponse getJobById(Long id);
 
     KanbanBoardResponse getKanbanBoard(Long jobId, Principal principal);

@@ -9,6 +9,7 @@ import ats.entity.Candidate;
 import ats.entity.Payment;
 import ats.entity.UpgradePackage;
 import ats.exception.NotFoundException;
+import ats.exception.BadRequestException;
 import ats.helper.MessageHelper;
 import ats.config.VNPayConfig;
 import ats.repository.ApplicationRepository;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -50,23 +52,31 @@ public class VNPayServiceImpl implements VNPayService {
     private final VNPayConfig vnPayConfig;
     private final VNPayUtil vnPayUtil;
 
+    @Value("${payment.membership-duration-days:30}")
+    private long membershipDurationDays;
+
         private String message(String code, Object... args) {
                 return MessageHelper.getMessage(code, args);
         }
 
         @Override
         @Transactional
-        public VNPayResponse createVnPayPayment(CreateVnPayRequest req, HttpServletRequest httpReq) {
-                log.info("VNPay: creating payment for candidateId={}, upgradePackageId={}",
-                                req.getCandidateId(), req.getUpgradePackageId());
+    public VNPayResponse createVnPayPayment(
+            Long candidateId,
+            CreateVnPayRequest req,
+            HttpServletRequest httpReq) {
+        log.info("VNPay: creating payment for candidateId={}, upgradePackageId={}",
+                candidateId, req.getUpgradePackageId());
 
-                Candidate candidate = candidateRepository.findById(req.getCandidateId())
-                                .orElseThrow(() -> new NotFoundException(
-                                                message("candidate.notFound", req.getCandidateId())));
+        Candidate candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new NotFoundException(
+                        message("candidate.notFound", candidateId)));
 
         UpgradePackage upgradePackage = upgradePackageRepository.findById(req.getUpgradePackageId())
                 .orElseThrow(
                         () -> new NotFoundException(message("upgradePackage.notFound", req.getUpgradePackageId())));
+
+        validatePackageUpgrade(candidate, upgradePackage);
 
         String txnRef = vnPayUtil.getRandomNumber(8);
         String orderId = "ATS" + System.currentTimeMillis();
@@ -194,8 +204,9 @@ public class VNPayServiceImpl implements VNPayService {
 
     @Override
     @Transactional(readOnly = true)
-    public VNPayResponse getByTransactionId(String transactionId) {
-        Payment payment = paymentRepository.findByTransactionIdAndIsDeletedFalse(transactionId)
+    public VNPayResponse getByTransactionId(Long candidateId, String transactionId) {
+        Payment payment = paymentRepository
+                .findByTransactionIdAndCandidateId_IdAndIsDeletedFalse(transactionId, candidateId)
                 .orElseThrow(() -> new NotFoundException(
                         message("payment.notFound", transactionId)));
         return VNPayResponse.builder()
@@ -257,5 +268,29 @@ public class VNPayServiceImpl implements VNPayService {
         request.getParameterNames().asIterator()
                 .forEachRemaining(name -> map.put(name, request.getParameter(name)));
         return map;
+    }
+
+    private void validatePackageUpgrade(Candidate candidate, UpgradePackage requestedPackage) {
+        UpgradePackage currentPackage = candidate.getUpgradePackageId();
+        if (currentPackage == null) {
+            return;
+        }
+
+        Payment latestSuccessfulPayment = paymentRepository
+                .findTopByCandidateId_IdAndStatusAndIsDeletedFalseOrderByPaidAtDesc(
+                        candidate.getId(), PaymentStatus.SUCCESS)
+                .orElse(null);
+
+        boolean isCurrentPackageActive = latestSuccessfulPayment == null
+                || latestSuccessfulPayment.getPaidAt() == null
+                || latestSuccessfulPayment.getPaidAt()
+                        .plusDays(membershipDurationDays)
+                        .isAfter(LocalDateTime.now(VIETNAM_ZONE));
+
+        if (isCurrentPackageActive
+                && requestedPackage.getPriority() <= currentPackage.getPriority()) {
+            throw new BadRequestException(
+                    "Gói hiện tại vẫn còn hiệu lực. Bạn chỉ có thể nâng cấp lên gói cao hơn.");
+        }
     }
 }

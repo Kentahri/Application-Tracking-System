@@ -6,6 +6,8 @@ import ats.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 public class LoginResponse {
@@ -48,12 +50,18 @@ public class LoginResponse {
 
         private String membershipName;
 
+        private Integer membershipPriority;
+
+        private LocalDateTime membershipExpiresAt;
+
         public static UserInfo from(User user) {
             return new UserInfo(
                     user.getId(),
                     user.getEmail(),
                     user.getName(),
                     user.getRole(),
+                    null,
+                    null,
                     null,
                     null
             );
@@ -63,6 +71,9 @@ public class LoginResponse {
             String membershipName = candidate.getUpgradePackageId() != null
                     ? candidate.getUpgradePackageId().getPackageName()
                     : null;
+            Integer membershipPriority = candidate.getUpgradePackageId() != null
+                    ? candidate.getUpgradePackageId().getPriority()
+                    : null;
 
             return new UserInfo(
                     candidate.getId(),
@@ -70,7 +81,9 @@ public class LoginResponse {
                     candidate.getName(),
                     UserRole.CANDIDATE,
                     candidate.getNumberOfQueryQuota(),
-                    membershipName
+                    membershipName,
+                    membershipPriority,
+                    null
             );
         }
     }

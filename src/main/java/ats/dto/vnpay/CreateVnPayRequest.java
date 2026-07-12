@@ -13,9 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CreateVnPayRequest {
 
-    @NotNull(message = "{validation.vnpay.candidateId.null}")
-    private Long candidateId;
-
     @NotNull(message = "{validation.vnpay.upgradePackageId.null}")
     private Long upgradePackageId;
 

@@ -68,6 +68,17 @@ public class JobController {
         return jobService.getAllPostedJobs(new PagingRequest(page, size));
     }
 
+    @GetMapping("/all")
+    @Operation(
+            summary = "Get all posted jobs without pagination (public)",
+            description = "Get every published job without page and size parameters. No authentication required."
+    )
+    @ApiResponse(responseCode = "200", description = "All posted jobs retrieved successfully")
+    public List<JobResponse> getAllPublicWithoutPaging() {
+        log.debug("REST request to get all posted jobs without pagination");
+        return jobService.getAllPostedJobsWithoutPaging();
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get job by id", description = "Get job detail by id")
     @ApiResponses({

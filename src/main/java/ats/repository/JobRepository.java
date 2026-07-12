@@ -2,6 +2,7 @@ package ats.repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query(value = "SELECT j FROM Job j JOIN FETCH j.departmentId WHERE j.status = :status",
            countQuery = "SELECT count(j) FROM Job j WHERE j.status = :status")
     Page<Job> findByStatusWithDepartment(@Param("status") JobStatus status, Pageable pageable);
+
+    @Query("SELECT j FROM Job j JOIN FETCH j.departmentId WHERE j.status = :status ORDER BY j.id DESC")
+    List<Job> findAllByStatusWithDepartment(@Param("status") JobStatus status);
 
     @Query(
             value = """
