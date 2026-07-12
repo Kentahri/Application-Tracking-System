@@ -4,6 +4,7 @@ import java.util.List;
 
 public record CandidateChatResponse(
         String answer,
-        List<JobSuggestionResponse> jobs
+        List<JobSuggestionResponse> jobs,
+        Integer numberOfQueryQuota
 ) {
 }

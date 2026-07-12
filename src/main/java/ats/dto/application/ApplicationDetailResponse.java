@@ -19,6 +19,7 @@ import java.util.List;
 public class ApplicationDetailResponse {
 
     private Long applicationId;
+    private Integer priority;
     private LocalDateTime appliedAt;
     private JobInfo job;
     private CandidateInfo candidate;

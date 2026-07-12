@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class KanbanApplicationResponse {
 
     private Long applicationId;
+    private Integer priority;
     private Long candidateId;
     private String candidateName;
     private String candidateEmail;

@@ -36,6 +36,7 @@ public interface ApplicationMapper {
                                                        Interview interview) {
         return new ApplicationDetailResponse(
                 application.getId(),
+                application.getPriority(),
                 application.getCreatedAt(),
                 toJobInfo(application.getJobId()),
                 toCandidateInfo(application.getCandidateId()),
