@@ -18,6 +18,8 @@ public interface CandidateRepository extends JpaRepository<Candidate, Long> {
             """)
     Candidate findByEmail(@Param("email") String email);
 
+    boolean existsByEmail(String email);
+
     @Modifying
     @Query("""
             update Candidate candidate
