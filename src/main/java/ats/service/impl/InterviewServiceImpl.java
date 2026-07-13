@@ -106,6 +106,9 @@ public class InterviewServiceImpl implements InterviewService {
         if (interview.getStatus() == InterviewStatus.CANCELLED) {
             throw new BadRequestException(MessageHelper.getMessage("error.interview.cancelled"));
         }
+        if (interview.getScheduledAt() != null && LocalDateTime.now().isBefore(interview.getScheduledAt())) {
+            throw new BadRequestException(MessageHelper.getMessage("error.interview.result.tooEarly"));
+        }
     }
 
     private String normalizeFeedback(String feedback) {

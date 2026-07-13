@@ -31,4 +31,31 @@ public class InterviewScheduleResponse {
     private InterviewStatus status;
     private InterviewResult result;
     private String feedback;
+    private CandidateInfo candidate;
+    private CvInfo cv;
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class CandidateInfo {
+        private Long id;
+        private String name;
+        private String email;
+        private String phone;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class CvInfo {
+        private Long id;
+        private String filePath;
+        private String fileName;
+        private String fileType;
+        private LocalDateTime parsedAt;
+        private Boolean hasParsedText;
+        private LocalDateTime createdAt;
+    }
 }
