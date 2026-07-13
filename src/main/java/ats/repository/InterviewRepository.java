@@ -55,6 +55,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             join fetch i.applicationId a
             join fetch a.candidateId
             join fetch a.jobId
+            left join fetch a.cvId
             where i.id = :id
               and i.interviewerId.id = :interviewerId
             """)
@@ -71,6 +72,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
                     join fetch i.applicationId a
                     join fetch a.candidateId
                     join fetch a.jobId
+                    left join fetch a.cvId
                     where i.interviewerId.id = :interviewerId
                     """,
             countQuery = """
