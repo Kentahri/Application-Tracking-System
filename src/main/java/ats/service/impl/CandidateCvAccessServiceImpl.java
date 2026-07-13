@@ -2,6 +2,7 @@ package ats.service.impl;
 
 import ats.constant.UserStatus;
 import ats.dto.chat.CandidateCvResponse;
+import ats.dto.cv.CvFileDownload;
 import ats.entity.Candidate;
 import ats.entity.Cv;
 import ats.exception.NotFoundException;
@@ -9,6 +10,8 @@ import ats.exception.UnauthorizedException;
 import ats.repository.CandidateRepository;
 import ats.repository.CvRepository;
 import ats.service.CandidateCvAccessService;
+import ats.storage.MinioStorage;
+import ats.storage.StoredFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class CandidateCvAccessServiceImpl implements CandidateCvAccessService {
 
     private final CandidateRepository candidateRepository;
     private final CvRepository cvRepository;
+    private final MinioStorage minioStorage;
 
     @Override
     public Candidate getCurrentCandidate(Principal principal) {
@@ -69,5 +73,22 @@ public class CandidateCvAccessServiceImpl implements CandidateCvAccessService {
     @Override
     public CandidateCvResponse getOwnedCvDetail(Long cvId, Principal principal) {
         return CandidateCvResponse.from(getOwnedCv(cvId, principal));
+    }
+
+    @Override
+    public CvFileDownload getOwnedCvFile(Long cvId, Principal principal) {
+        Cv cv = getOwnedCv(cvId, principal);
+        if (cv.getFilePath() == null || cv.getFilePath().isBlank()) {
+            throw new NotFoundException("CV file not found");
+        }
+
+        StoredFile storedFile = minioStorage.getFile(cv.getFilePath());
+        return new CvFileDownload(storedFile, extractFileName(cv.getFilePath(), cvId));
+    }
+
+    private String extractFileName(String objectKey, Long cvId) {
+        int slash = objectKey.lastIndexOf('/');
+        String fileName = slash >= 0 ? objectKey.substring(slash + 1) : objectKey;
+        return fileName.isBlank() ? "cv-" + cvId : fileName;
     }
 }
