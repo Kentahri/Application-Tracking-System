@@ -1,6 +1,7 @@
 package ats.service;
 
 import ats.dto.chat.CandidateCvResponse;
+import ats.dto.cv.CvFileDownload;
 import ats.entity.Candidate;
 import ats.entity.Cv;
 
@@ -16,4 +17,6 @@ public interface CandidateCvAccessService {
     List<CandidateCvResponse> getOwnedCvs(Principal principal);
 
     CandidateCvResponse getOwnedCvDetail(Long cvId, Principal principal);
+
+    CvFileDownload getOwnedCvFile(Long cvId, Principal principal);
 }

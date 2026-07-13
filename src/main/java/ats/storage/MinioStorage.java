@@ -1,7 +1,14 @@
 package ats.storage;
 
 import io.minio.MinioClient;
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.PutObjectArgs;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
+import io.minio.errors.ErrorResponseException;
+import ats.exception.BadRequestException;
+import ats.exception.NotFoundException;
 import okhttp3.OkHttpClient;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -93,6 +100,48 @@ public class MinioStorage {
         }
 
         return new StoredResult(key, original, contentType);
+    }
+
+    public StoredFile getFile(String objectKey) {
+        if (!StringUtils.hasText(objectKey)) {
+            throw new IllegalArgumentException("objectKey must not be blank");
+        }
+
+        String normalizedKey = normalizeObjectKey(objectKey);
+
+        try {
+            StatObjectResponse metadata = client.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(props.getBucket())
+                            .object(normalizedKey)
+                            .build()
+            );
+
+            GetObjectResponse stream = client.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(props.getBucket())
+                            .object(normalizedKey)
+                            .build()
+            );
+
+            String contentType = StringUtils.hasText(metadata.contentType())
+                    && !"application/octet-stream".equalsIgnoreCase(metadata.contentType())
+                    ? metadata.contentType()
+                    : guessFromExtension(normalizedKey);
+
+            return new StoredFile(stream, metadata.size(), contentType, normalizedKey);
+        } catch (ErrorResponseException ex) {
+            if (ex.errorResponse() != null
+                    && ("NoSuchKey".equals(ex.errorResponse().code())
+                    || "NoSuchObject".equals(ex.errorResponse().code()))) {
+                throw new NotFoundException("File not found");
+            }
+            throw new BadRequestException("Cannot read file from storage");
+        } catch (NotFoundException | BadRequestException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new BadRequestException("Cannot read file from storage");
+        }
     }
 
     // region helpers
@@ -232,6 +281,19 @@ public class MinioStorage {
 
     private String stripTrailingSlash(String s) {
         return s.endsWith("/") ? s.substring(0, s.length() - 1) : s;
+    }
+
+    private String normalizeObjectKey(String objectKey) {
+        String normalized = objectKey.trim().replace('\\', '/');
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.isBlank()
+                || normalized.equals("..")
+                || normalized.contains("../")) {
+            throw new IllegalArgumentException("Invalid object key");
+        }
+        return normalized;
     }
 
     // endregion
