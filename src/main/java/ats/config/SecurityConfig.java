@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/candidate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/recruiter/jobs/getAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/recruiter/jobs/all").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/jobs/*/apply").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/jobs/*/apply").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/vnpay/callback").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/vnpay/create").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/vnpay/*").hasRole("CANDIDATE")
